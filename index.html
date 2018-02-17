@@ -25,9 +25,15 @@
         #altitude{
             font-size: 30px;
         }
+
+        #textcanvas{
+            display: none;
+        }
     </style>
 </head>
 <body>
+
+    <canvas id="textcanvas" width="200" height="50"></canvas>
 
     <div id="controls">
         <p>
@@ -46,6 +52,15 @@
     <script>
         var camera, scene, renderer;
         var rocket;
+        var rockethud;
+        var hudlines;
+
+        var hudtext_ctx;
+        var hudtext_canvas;
+
+        // var font;
+        // var textgeometry;
+        // var textmesh;
         var rocketOffset = new THREE.Vector3(0,0.9,0);
         var cameraOffset = new THREE.Vector3(1,2,4);
         var full;
@@ -54,6 +69,7 @@
         var i = 0;
 
         var line;
+        var linegeo;
 
         var bgcol = 0x121214;
 
@@ -79,7 +95,6 @@
 
             camera.position = rocketOffset;
             camera.position.add(cameraOffset);
-
             camera.rotation.set(-0.4,0,0);
 
             scene = new THREE.Scene();
@@ -94,21 +109,41 @@
             rocket.scale.multiplyScalar(0.1);
             scene.add(rocket);
 
-            var gridsize = 100;
+            hudlines = new THREE.Geometry();
+            hudlines.vertices = [
+                new THREE.Vector3(-.2,.2,0),
+                new THREE.Vector3(-.6,.6,0),
+                new THREE.Vector3(-1.5,.6,0)
+            ];
+            var line_material = new THREE.LineBasicMaterial({color: 0xffffff });
 
+            rockethud = new THREE.Group();
+            rockethud.add(new THREE.Line(hudlines, line_material));
+
+
+            hudtext_canvas = document.getElementById("textcanvas");
+            hudtext_ctx = hudtext_canvas.getContext("2d");
+            
+            hudtext_ctx.fillStyle = "white";
+            hudtext_ctx.textAlign="end"; 
+            hudtext_ctx.font = "40px Consolas, Mono";
+            hudtext_ctx.fillText("120.00m",195,45);
+
+            hudtext_texture = new THREE.CanvasTexture(hudtext_canvas);
+            var hudtext_material = new THREE.MeshBasicMaterial({map:hudtext_texture, transparent: true});
+            var textscale = 0.02;
+            var hud = new THREE.Mesh(new THREE.PlaneGeometry(hudtext_canvas.width, hudtext_canvas.height), hudtext_material);
+            hud.scale.multiplyScalar(0.005);
+            hud.position.set(-1.1, 0.74, 0);
+
+            rockethud.add(hud);
+
+            scene.add(rockethud);
+
+            var gridsize = 100;
             var gridHelper = new THREE.GridHelper( gridsize*10, gridsize, 0x888888, 0x444444 );
             scene.add( gridHelper );
-            // var gridHelper2 = new THREE.GridHelper( gridsize*10, gridsize, 0x888888, 0x444444 );
-            // scene.add( gridHelper2 );
-            var gridHelper3 = new THREE.GridHelper( 10000000, 2, 0x888888, 0x444444 );
-            scene.add( gridHelper3 );
 
-            // var cubegeo = new THREE.BoxGeometry(2, 2, 2);
-            // var mat = new THREE.MeshBasicMaterial({color: 0xcccccc});
-            // var cube = new THREE.Mesh(cubegeo, mat);
-            // cube.position.y = 1;
-            // cube.position.z = -2;
-            // scene.add(cube);
 
             controls = new THREE.OrbitControls(camera);
 
@@ -119,18 +154,15 @@
             document.body.appendChild( renderer.domElement );
 
 
-            // var linegeo = new THREE.Geometry();
-            // linegeo.vertices.push(
-            // );
-            // var line_material = new THREE.LineBasicMaterial({
-            //     color: 0xffffff
-            // });
-            // line = new THREE.Line( linegeo, line_material );
-            // line.scale.y = 0.06;
-            // line.rotation.x = -Math.PI/2;
+            linegeo = new THREE.Geometry();
+            linegeo.vertices.push(new THREE.Vector3(0,0,0));
+            line = new THREE.Line( linegeo, line_material );
+            scene.add( line );
 
-            // scene.add( line );
-            //renderer.render( scene, camera );
+            linegeo.vertices.push(new THREE.Vector3(1,0,0));
+            linegeo.vertices.push(new THREE.Vector3(0,0,1));
+            linegeo.vertices.push(new THREE.Vector3(1,0,0));
+
 
 
             var bgmat = new THREE.MeshBasicMaterial({color: bgcol});
@@ -179,7 +211,6 @@
             // });
 
 
-            //
             window.addEventListener( 'resize', onWindowResize, false );
         }
 
@@ -188,6 +219,13 @@
             camera.updateProjectionMatrix();
             renderer.setSize( window.innerWidth, window.innerHeight );
         }
+
+        function updateHUD(text){
+            hudtext_ctx.clearRect(0,0,hudtext_canvas.width, hudtext_canvas.height);
+            hudtext_ctx.fillText(text, 195,45);
+            hudtext_texture.needsUpdate = true;
+        }
+
         function animate() {
             requestAnimationFrame( animate );
 
@@ -205,6 +243,8 @@
             document.getElementById('altitude1').innerHTML = pz.toFixed(2) + 'm';
             document.getElementById('altitude2').innerHTML = pz2.toFixed(2) + 'm';
 
+            updateHUD(pz.toFixed(2) + 'm');
+
             var quat = new THREE.Quaternion(rx, ry, rz, rw);
 
             quat.multiply(new THREE.Quaternion(0, 0, -0.7071, 0.7071));
@@ -212,29 +252,30 @@
 
             rocket.quaternion.set(quat.x, quat.y, quat.z, quat.w);
 
-            //console.log(px, py, pz);
-
             [px, py, pz] = [px, pz, -py];
+
+            if(i % 10 == 0){
+                //linegeo.vertices.push(new THREE.Vector3(px, py, pz));
+                linegeo.verticesNeedUpdate = true;
+
+                //console.log(linegeo.vertices);
+            }
+
+
 
             rocket.position.set(px, py, pz);
             rocket.position.add(rocketOffset);
+
+            rockethud.position.set(px, py, pz);
+            rockethud.position.add(rocketOffset);
 
             //camera.lookAt(px, py, pz);
             camera.position.set(px, py, pz);
             camera.position.add(cameraOffset);
 
-            //rocket.quaternion.set(rx, ry, rz, rw);
-            //console.log(rocket.quaternion);
-            //rocket.applyQuaternion(new THREE.Quaternion(-0.7071, 0, 0, 0.7071));
-
             ++i;
             i%= rotdata.results[0].series[0].values.length;
 
-            //line.rotation.z += 0.01
-
-            //rocket.rotation.y += 0.015;
-            //full.rotation.y += 0.015;
-            // line.rotation.y += 0.01;
             renderer.render( scene, camera );
         }
     </script>

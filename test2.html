@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>TEST</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            margin: 0px;
+            background-color: #000000;
+            overflow: hidden;
+            color: white;
+            font-family: consolas, mono;
+        }
+
+        #textcanvas{
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <script src="./three.js"></script>
+    <script src="./OrbitControls.js"></script>
+
+
+    <script type="text/javascript">
+       
+        var MAX_POINTS = 50;
+        var drawCount = 0;
+
+        // renderer
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        // scene
+        var scene = new THREE.Scene();
+
+        // camera
+        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+        camera.position.set( 0, 0, 20 );
+
+        // geometry
+        var geometry = new THREE.BufferGeometry();
+
+        // attributes
+        var positions = new Float32Array( MAX_POINTS * 3 ); // 3 values per vertex
+
+        geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+
+        drawCount = 0;
+        geometry.setDrawRange( 0, drawCount );
+
+        // material
+        var material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 2 } );
+
+        // line
+        var line = new THREE.Line( geometry,  material );
+        scene.add( line );
+
+        animate();
+
+        var i = 0;
+
+        function animate(){
+            requestAnimationFrame(animate);
+
+            if(++ drawCount == MAX_POINTS){
+                drawCount = 0;
+                i = 0;
+            }
+
+            positions[i++] = Math.random() * 10 - 5;
+            positions[i++] = Math.random() * 10 - 5;
+            positions[i++] = Math.random() * 10 - 5;
+
+            line.geometry.setDrawRange(0, drawCount);
+            line.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render( scene, camera );        
+            
+        }
+
+
+    </script>
+</body>
+</html>
