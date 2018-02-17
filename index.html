@@ -44,6 +44,7 @@
         </p>
         
         <button onclick="i = 0;">Restart</button>
+        <button onclick="animate();">Step</button>
     </div>
 
     <script src="./three.js"></script>
@@ -58,6 +59,8 @@
         var hudtext_ctx;
         var hudtext_canvas;
 
+        var MAX_POINTS = 10000;
+
         // var font;
         // var textgeometry;
         // var textmesh;
@@ -68,8 +71,7 @@
         var rotdata;
         var i = 0;
 
-        var line;
-        var linegeo;
+        var trajectory_line;
 
         var bgcol = 0x121214;
 
@@ -154,15 +156,13 @@
             document.body.appendChild( renderer.domElement );
 
 
-            linegeo = new THREE.Geometry();
-            linegeo.vertices.push(new THREE.Vector3(0,0,0));
-            line = new THREE.Line( linegeo, line_material );
-            scene.add( line );
+            var trajectory_line_geo = new THREE.BufferGeometry();
+            var trajectory_line_positions = new Float32Array( MAX_POINTS * 3 ); // 3 values per vertex
+            trajectory_line_geo.addAttribute( 'position', new THREE.BufferAttribute( trajectory_line_positions, 3 ) );
+            trajectory_line = new THREE.Line(trajectory_line_geo, line_material);
+            trajectory_line.position.set(rocketOffset.x, rocketOffset.y, rocketOffset.z);
 
-            linegeo.vertices.push(new THREE.Vector3(1,0,0));
-            linegeo.vertices.push(new THREE.Vector3(0,0,1));
-            linegeo.vertices.push(new THREE.Vector3(1,0,0));
-
+            scene.add( trajectory_line );
 
 
             var bgmat = new THREE.MeshBasicMaterial({color: bgcol});
@@ -226,8 +226,10 @@
             hudtext_texture.needsUpdate = true;
         }
 
+
+
         function animate() {
-            requestAnimationFrame( animate );
+            requestAnimationFrame( function(){} );
 
             var rx, ry, rz, rw;
             var px, py, pz;
@@ -254,13 +256,14 @@
 
             [px, py, pz] = [px, pz, -py];
 
-            if(i % 10 == 0){
-                //linegeo.vertices.push(new THREE.Vector3(px, py, pz));
-                linegeo.verticesNeedUpdate = true;
+            positions = trajectory_line.geometry.attributes.position.array;
 
-                //console.log(linegeo.vertices);
-            }
+            positions[i * 3] = px;
+            positions[i * 3 + 1] = py;
+            positions[i * 3 + 2] = pz;
+            trajectory_line.geometry.setDrawRange(0, i);
 
+            trajectory_line.geometry.attributes.position.needsUpdate = true;
 
 
             rocket.position.set(px, py, pz);
@@ -273,6 +276,9 @@
             camera.position.set(px, py, pz);
             camera.position.add(cameraOffset);
 
+            console.log(i);
+            console.log(positions);
+            console.log(trajectory_line.geometry.attributes.position);
             ++i;
             i%= rotdata.results[0].series[0].values.length;
 
