@@ -24,6 +24,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
     // "target" sets the location of focus, where the object orbits around
     this.target = new THREE.Vector3();
+    this.followTarget = false;
 
     // How far you can dolly in and out ( PerspectiveCamera only )
     this.minDistance = 0;
@@ -135,7 +136,22 @@ THREE.OrbitControls = function ( object, domElement ) {
 
             var position = scope.object.position;
 
-            offset.copy( position ).sub( scope.target );
+            offset.copy( position );
+
+            if(this.followTarget){
+                if(targetOld === undefined){
+
+                    targetOld = scope.target.clone();
+                    console.log(targetOld);
+                }
+                
+
+                offset.sub( targetOld );
+
+                targetOld = scope.target.clone();
+            }else{
+                offset.sub( scope.target );
+            }
 
             // rotate offset to "y-axis-is-up" space
             offset.applyQuaternion( quat );
@@ -270,6 +286,8 @@ THREE.OrbitControls = function ( object, domElement ) {
     var dollyStart = new THREE.Vector2();
     var dollyEnd = new THREE.Vector2();
     var dollyDelta = new THREE.Vector2();
+
+    var targetOld;
 
     function getAutoRotationAngle() {
 

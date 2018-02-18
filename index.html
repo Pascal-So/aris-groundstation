@@ -19,6 +19,8 @@
             top: 30px;
             left: 30px;
 
+            display: none;
+
             font-size: 18px;
         }
 
@@ -48,10 +50,12 @@
     </div>
 
     <script src="./three.js"></script>
+    <script src="./stats.js"></script>
     <script src="./OrbitControls.js"></script>
 
     <script>
-        var camera, scene, renderer;
+        var camera, scene, renderer, controls;
+
         var rocket;
         var rockethud;
         var hudlines;
@@ -91,9 +95,14 @@
         }
         client.send();
 
+        var stats = new Stats();
+        stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+        document.body.appendChild( stats.dom );
+
+
         function init() {
 
-            camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 100000 );
+            camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 100000 );
 
             camera.position = rocketOffset;
             camera.position.add(cameraOffset);
@@ -147,7 +156,6 @@
             scene.add( gridHelper );
 
 
-            controls = new THREE.OrbitControls(camera);
 
             renderer = new THREE.WebGLRenderer({antialias: true});
             renderer.setPixelRatio( window.devicePixelRatio );
@@ -156,10 +164,13 @@
             document.body.appendChild( renderer.domElement );
 
 
+            var dashed_line_mat = new THREE.LineDashedMaterial({
+                color: 0xcccccc, dashSize: 0.2, gapSize: .1
+            });
             var trajectory_line_geo = new THREE.BufferGeometry();
             var trajectory_line_positions = new Float32Array( MAX_POINTS * 3 ); // 3 values per vertex
             trajectory_line_geo.addAttribute( 'position', new THREE.BufferAttribute( trajectory_line_positions, 3 ) );
-            trajectory_line = new THREE.Line(trajectory_line_geo, line_material);
+            trajectory_line = new THREE.Line(trajectory_line_geo, dashed_line_mat);
             trajectory_line.position.set(rocketOffset.x, rocketOffset.y, rocketOffset.z);
 
             scene.add( trajectory_line );
@@ -205,6 +216,11 @@
                 rocket.add(exhaustoutline);
             });
 
+
+            controls = new THREE.OrbitControls(camera);
+            controls.target = rocket.position;
+            controls.followTarget = true;
+
             // loader.load('models/full.json', (geometry, material) => {
             //     full = new THREE.Mesh(geometry, material);
             //     scene.add(full);
@@ -229,7 +245,8 @@
 
 
         function animate() {
-            requestAnimationFrame( function(){} );
+            requestAnimationFrame( animate );
+            stats.begin();
 
             var rx, ry, rz, rw;
             var px, py, pz;
@@ -261,9 +278,12 @@
             positions[i * 3] = px;
             positions[i * 3 + 1] = py;
             positions[i * 3 + 2] = pz;
-            trajectory_line.geometry.setDrawRange(0, i);
+            trajectory_line.geometry.setDrawRange(0, i+1);
 
+            // https://stackoverflow.com/a/36498386 this had me very confused for a while...
+            trajectory_line.geometry.computeBoundingSphere();
             trajectory_line.geometry.attributes.position.needsUpdate = true;
+            trajectory_line.computeLineDistances();
 
 
             rocket.position.set(px, py, pz);
@@ -273,16 +293,17 @@
             rockethud.position.add(rocketOffset);
 
             //camera.lookAt(px, py, pz);
-            camera.position.set(px, py, pz);
-            camera.position.add(cameraOffset);
+            // camera.position.set(px, py, pz);
+            // camera.position.add(cameraOffset);
 
-            console.log(i);
-            console.log(positions);
-            console.log(trajectory_line.geometry.attributes.position);
+            controls.update();
+
             ++i;
             i%= rotdata.results[0].series[0].values.length;
 
             renderer.render( scene, camera );
+
+            stats.end();
         }
     </script>
 
