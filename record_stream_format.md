@@ -1,6 +1,7 @@
 # Rocket records data format
 
 Authors: Pascal Sommer, Raphael Schnider
+
 Version history:
 * 0.1 - initial draft - 2018-03-07
 
@@ -70,7 +71,7 @@ We are planning to use this format in the following interfaces:
 
 js object, required.
 
-#### 'type'
+#### 'header'->'type'
 
 string, required.
 
@@ -82,19 +83,18 @@ Fields listed in the type but missing in the actual data may generate errors or 
 
 Fields that are not part of the type specification but are still present in the data should be ignored by the receiving software, and may either be dropped or stored anyway.
 
-'flight': Data sent down from a rocket during a flight. Includes:
-* tbd.
+* 'flight': Data sent down from a rocket during a flight. Includes: tbd.
 
-'freeform': This type makes no statement about the fields included in the reccord. The receiving software should accept all fields contained in the data. When choosing this type, please consider that the visualization software might not be able to handle some of the fields, or won't know what components (map/3d view/graphs) to display.
+* 'freeform': This type makes no statement about the fields included in the reccord. The receiving software should accept all fields contained in the data. When choosing this type, please consider that the visualization software might not be able to handle some of the fields, or won't know what components (map/3d view/graphs) to display.
 
-'windtunnel': tbd
+* 'windtunnel': tbd.
 
-'static firing test': tbd
+* 'static firing test': tbd.
 
-'simulation': tbd
+* 'simulation': tbd.
 
 
-#### 'name'
+#### 'header'->'name'
 
 string, required.
 
@@ -102,7 +102,7 @@ This field should only contain lowercase alphanumeric characters and underscores
 
 The value should be a unique description of this event, it will serve as the identifier to find the event in the visualization software.
 
-#### 'description'
+#### 'header'->'description'
 
 string, optional.
 
@@ -116,19 +116,19 @@ Contains between 0 and infinite js objects.
 
 A packet in this array can either be a collection of values (a data packet) or an event (event packet).
 
-#### 'ts'
+#### 'data'[i]->'ts'
 
 string, required.
 
 Absolute nanosecond timestamp.
 
-#### 'event'
+#### 'data'[i]->'event'
 
 bool, required.
 
 If set to true, this packet represents an event, otherwise, this is a data packet and contains values.
 
-#### 'severity'
+#### 'data'[i]->'severity'
 
 int, only for events, optional.
 
@@ -144,7 +144,7 @@ The event severity, according to the syslog scale.
 
 This field should not be present in data packets.
 
-#### 'message'
+#### 'data'[i]->'message'
 
 string, only for events, required.
 
@@ -152,7 +152,7 @@ The event message. This string should not contain any newlines.
 
 This field should not be present in data packets.
 
-#### 'values'
+#### 'data'[i]->'values'
 
 js object, only for data packets, required.
 
