@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+
+  influx:
+    image: influxdb:1.4
+    networks:
+      - local
+
+  visualization:
+    build: ./visualization
+    networks:
+      - local
+    depends_on:
+      - influx
+
+  receiver:
+    build: ./receiver
+    networks:
+      - local
+    depends_on:
+      - influx
+
+  haproxy:
+    image: haproxy:1.8
+    networks:
+      - local
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - influx
+      - visualization
+      - receiver
+    volumes:
+      - './haproxy/:/usr/local/etc/haproxy/'
+
+networks:
+  local:
+    driver: bridge

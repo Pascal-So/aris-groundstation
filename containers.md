@@ -10,14 +10,14 @@ The server will run some more software that is not directly connected to the gro
 
 If possible, set up everything in two docker-compose.yml files, one for server and one for laptop
 
-### software on groundstation laptop
+### Software on groundstation laptop
 
 * InfluxDB
 * Visualization
 * Data receiver
 * RF receiver interface
 
-### groundstation software running on server
+### Groundstation software running on server
 
 * InfluxDB
 * Visualization
