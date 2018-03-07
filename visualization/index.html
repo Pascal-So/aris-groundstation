@@ -35,7 +35,7 @@
 </head>
 <body>
 
-    <canvas id="textcanvas" width="200" height="50"></canvas>
+    <canvas id="textcanvas" width="256" height="64"></canvas>
 
     <div id="controls">
         <p>
@@ -54,7 +54,9 @@
     <script src="./OrbitControls.js"></script>
 
     <script>
-        var camera, scene, renderer, controls;
+        var camera, camera2, scene, renderer, renderer2, controls;
+
+        var firstquat = -1;
 
         var rocket;
         var rockethud;
@@ -102,11 +104,14 @@
 
         function init() {
 
-            camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 100000 );
+            camera = new THREE.PerspectiveCamera( 70, window.innerWidth /2/ window.innerHeight, 0.01, 100000 );
+            camera2 = new THREE.PerspectiveCamera( 70, window.innerWidth/2 / window.innerHeight, 0.01, 100000 );
 
             camera.position = rocketOffset;
             camera.position.add(cameraOffset);
             camera.rotation.set(-0.4,0,0);
+
+            camera2.position.set(0,2000,0);
 
             scene = new THREE.Scene();
 
@@ -145,7 +150,7 @@
             var textscale = 0.02;
             var hud = new THREE.Mesh(new THREE.PlaneGeometry(hudtext_canvas.width, hudtext_canvas.height), hudtext_material);
             hud.scale.multiplyScalar(0.005);
-            hud.position.set(-1.1, 0.74, 0);
+            hud.position.set(-0.95, 0.74, 0);
 
             rockethud.add(hud);
 
@@ -159,9 +164,17 @@
 
             renderer = new THREE.WebGLRenderer({antialias: true});
             renderer.setPixelRatio( window.devicePixelRatio );
-            renderer.setSize( window.innerWidth, window.innerHeight );
+            renderer.setSize( window.innerWidth/2, window.innerHeight );
             renderer.setClearColor( bgcol );
             document.body.appendChild( renderer.domElement );
+
+
+
+            renderer2 = new THREE.WebGLRenderer({antialias: true});
+            renderer2.setPixelRatio( window.devicePixelRatio );
+            renderer2.setSize( window.innerWidth/2, window.innerHeight );
+            renderer2.setClearColor( bgcol );
+            document.body.appendChild( renderer2.domElement );
 
 
             var dashed_line_mat = new THREE.LineDashedMaterial({
@@ -170,7 +183,7 @@
             var trajectory_line_geo = new THREE.BufferGeometry();
             var trajectory_line_positions = new Float32Array( MAX_POINTS * 3 ); // 3 values per vertex
             trajectory_line_geo.addAttribute( 'position', new THREE.BufferAttribute( trajectory_line_positions, 3 ) );
-            trajectory_line = new THREE.Line(trajectory_line_geo, dashed_line_mat);
+            trajectory_line = new THREE.Line(trajectory_line_geo, line_material);
             trajectory_line.position.set(rocketOffset.x, rocketOffset.y, rocketOffset.z);
 
             scene.add( trajectory_line );
@@ -187,8 +200,6 @@
             loader.load('models/fins.json', geometry => {
                 var fins = new THREE.Mesh(geometry, bgmat);
                 rocket.add(fins);
-
-                renderer.render( scene, camera );
             });
 
             loader.load('models/finsoutline.json', geometry => {
@@ -265,12 +276,20 @@
             updateHUD(pz.toFixed(2) + 'm');
 
             var quat = new THREE.Quaternion(rx, ry, rz, rw);
+            if(firstquat === -1){
+                firstquat = quat.clone();
+                firstquat.inverse();
+            }
+
+            //quat.multiply(new THREE.Quaternion(0, 0, -0.7071, 0.7071));
+            //quat.premultiply(firstquat);
 
             quat.multiply(new THREE.Quaternion(0, 0, -0.7071, 0.7071));
             quat.premultiply(new THREE.Quaternion(-0.7071, 0, 0, 0.7071));
 
             rocket.quaternion.set(quat.x, quat.y, quat.z, quat.w);
 
+            // transform z-up to y-up
             [px, py, pz] = [px, pz, -py];
 
             positions = trajectory_line.geometry.attributes.position.array;
@@ -292,16 +311,21 @@
             rockethud.position.set(px, py, pz);
             rockethud.position.add(rocketOffset);
 
-            //camera.lookAt(px, py, pz);
+            camera2.lookAt(px, py, pz);
+            camera2.lookAt(0,0,0);
             // camera.position.set(px, py, pz);
             // camera.position.add(cameraOffset);
 
             controls.update();
 
+            var offset = new THREE.Vector3(0.1, 0, 0).applyQuaternion(camera.quaternion);
+
+            
             ++i;
             i%= rotdata.results[0].series[0].values.length;
 
             renderer.render( scene, camera );
+            renderer2.render( scene, camera2 );
 
             stats.end();
         }

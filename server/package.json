@@ -1,0 +1,11 @@
+{
+  "name": "aris-groundstation-server",
+  "version": "1.0.0",
+  "description": "Node.js server sendingt flight data from the database to the client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Pascal Sommer <p@pascalsommer.ch>",
+  "license": "ISC"
+}

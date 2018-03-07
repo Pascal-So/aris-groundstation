@@ -4,8 +4,9 @@ Authors: Pascal Sommer, Raphael Schnider
 
 Version history:
 * 0.1 - initial draft - 2018-03-07
+* 0.2 - add possible changes section - 2018-03-07
 
-## example
+## Example
 
 ```js
 {
@@ -64,6 +65,8 @@ We are planning to use this format in the following interfaces:
 * Sending data that was captured while offline.
 * etc.
 
+We are **not** planning to use it here:
+* RF communication from rocket to ground station.
 
 ## Format description
 
@@ -161,3 +164,35 @@ This object contains key value pairs of the recorded fields and their values. Se
 ## Transmission considerations
 
 We decided to interweave events and data packets to facilitate live streaming of records. There are however some more details that need to be considered when streaming a record. If, for example, flight data is to be streamed, such that the flight can be observed remotely in real time, we probably want to set up a database and some other environment factors for this specific flight on the server that is going to receive the stream, in other words, we want the server to be prepared. This could be achieved by sending only the header object in advance, without the data array, after which the server has time to set up the database, and people can open the live view in their browser. As soon as the flight begins, the easiest option would probably be to just stream the entire file, i.e. resending the header, that way we don't have to retain a connection to the server and the server can still identify the intended destination for this record, even if multiple tests or simulations run at the same time.
+
+## Possible changes
+
+This isn't a finished specification, we might have to change some things in the future. Here is a place for thoughts.
+
+Thoughts:
+
+* Grouping values
+
+  It might make sense to not throw all the fields in one big bucket, but rather divide them in to tables, so every value would then belong to a field within a table, whereas currently, values only belong to a field.
+
+  Possible new format for a data packet
+  ```js
+  {
+      'ts': '1510671624000000000',
+      'event': false,
+      'values': {
+          'pos': {
+              'x': '12.54',
+              'y': '7.39',
+              'z': '186.87'
+          },
+          'rot': {
+              'x': '0.7231',
+              'y': '0.00272',
+              'z': '-0.00073',
+              'w': '0.71138'
+          }
+      }
+  }
+  ```
+  We would thus have two tables, a table position with 3 columns and a table rotation with 4 columns.
