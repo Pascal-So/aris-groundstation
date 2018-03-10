@@ -4,37 +4,49 @@ services:
 
   influx:
     image: influxdb:1.4
-    networks:
-      - local
-
-  visualization:
-    build: ./visualization
-    networks:
-      - local
-    depends_on:
-      - influx
 
   receiver:
     build: ./receiver
-    networks:
-      - local
     depends_on:
       - influx
 
-  haproxy:
-    image: haproxy:1.8
-    networks:
-      - local
+  mysql:
+    image: mysql:5.7.21
+    env_file:
+      - ./.env
+
+  wordpress:
+    image: wordpress:php7.0
+    depends_on:
+      - mysql
+    env_file:
+      - ./.env
+    environment:
+      - VIRTUAL_HOST=wp.codelis.local
+
+
+  mediawiki:
+    image: mediawiki:stable
+    ports: 
+      - 8081:80
+    environment:
+      - VIRTUAL_HOST=mw.codelis.local
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
     ports:
       - 80:80
-      - 443:443
-    depends_on:
-      - influx
-      - visualization
-      - receiver
-    volumes:
-      - './haproxy/:/usr/local/etc/haproxy/'
 
-networks:
-  local:
-    driver: bridge
+  # haproxy:
+  #   image: haproxy:1.8
+  #   ports:
+  #     - 8080:80
+  #   depends_on:
+  #     - influx
+  #     - receiver
+  #     - mysql
+  #     - wordpress
+  #   volumes:
+  #     - './haproxy/:/usr/local/etc/haproxy/'
