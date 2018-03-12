@@ -4,16 +4,22 @@ services:
 
   influx:
     image: influxdb:1.4
-
-  receiver:
-    build: ./receiver
-    depends_on:
-      - influx
+    ports:
+      - 8086:8086
 
   mysql:
     image: mysql:5.7.21
     env_file:
       - ./.env
+    environment:
+      - MYSQL_DATABASE=wordpress
+
+  mysql-mediawiki:
+    image: mysql:5.7.21
+    env_file:
+      - ./.env
+    environment:
+      - MYSQL_DATABASE=mediawiki
 
   wordpress:
     image: wordpress:php7.0
@@ -24,13 +30,24 @@ services:
     environment:
       - VIRTUAL_HOST=wp.codelis.local
 
-
   mediawiki:
     image: mediawiki:stable
-    ports: 
-      - 8081:80
+    depends_on:
+      - mysql-mediawiki
     environment:
       - VIRTUAL_HOST=mw.codelis.local
+      - MYSQL_DATABASE=mediawiki
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=asdfasdf
+    # volumes:
+    #   - ./mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
+
+  apache:
+    image: httpd:2.4
+    environment:
+      - VIRTUAL_HOST=visualization.codelis.local
+    volumes:
+      - ./archive:/usr/local/apache2/htdocs/
 
   nginx-proxy:
     image: jwilder/nginx-proxy
@@ -38,15 +55,3 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock
     ports:
       - 80:80
-
-  # haproxy:
-  #   image: haproxy:1.8
-  #   ports:
-  #     - 8080:80
-  #   depends_on:
-  #     - influx
-  #     - receiver
-  #     - mysql
-  #     - wordpress
-  #   volumes:
-  #     - './haproxy/:/usr/local/etc/haproxy/'

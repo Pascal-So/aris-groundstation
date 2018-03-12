@@ -4,8 +4,13 @@
   "description": "Node.js server sendingt flight data from the database to the client",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node-dev index.js"
   },
   "author": "Pascal Sommer <p@pascalsommer.ch>",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.2",
+    "influx": "^5.0.7"
+  }
 }

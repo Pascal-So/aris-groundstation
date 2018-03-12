@@ -16,3 +16,5 @@ yarn-error.log*
 
 *.log
 .env
+
+ignored/
