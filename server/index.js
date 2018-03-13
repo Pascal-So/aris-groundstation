@@ -85,14 +85,6 @@ function getNewData(start_time = null){
         });
 }
 
-function lastTimestamp(data){
-    if(data.length == 0){
-        return null;
-    }
-
-    return data[data.length - 1].time.getNanoTime();
-}
-
 function fixTimestamps(data){
     data.map(row => {
         row.time = row.time.getNanoTime();
