@@ -1,0 +1,122 @@
+<template>
+  <div id="overview">
+    <div class="flexrow">
+      <div class="infoblock">
+        <h2>Flight:</h2>
+        <h1>Mestral</h1>
+      </div>
+      <div class="infoblock">
+        <h2>Date:</h2>
+        <h1>2017-11-14</h1>
+      </div>
+      <div class="infoblock">
+        <h2>Max Alt:</h2>
+        <h1>376.62m</h1>
+      </div>
+    </div>
+
+    <br>
+
+    <div class="playback">
+      <h2>T+04.38s</h2>
+      <div class="bar-placeholder-outer">
+        <div class="bar-placeholder-inner"></div>
+      </div>
+    </div>
+
+    <br>
+    <br>
+
+    <div class="grid">
+      <div class="panel">
+        <h3>adsf</h3>
+      </div>
+      <div class="panel">
+        <Graph title="Altitude"></Graph>
+        <Graph title="Temperature"></Graph>
+        
+      </div>
+      <div class="panel">
+        <h3>adsf</h3>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script>
+
+import Graph from './Graph.vue';
+
+export default {
+  components: {
+    'Graph': Graph,
+  },
+  name: 'Overview',
+  data () {
+    return {
+      
+    }
+  }
+}
+</script>
+
+<style scoped>
+#overview{
+  color: #CECECE;
+}
+
+.grid{
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: auto;
+  height: 200px;
+}
+
+.flexrow{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.panel{
+  border: 3px solid #5C5C5C;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border-radius: 3px;
+}
+
+.infoblock{
+  color: #868686;
+  padding-right: 20px;
+
+}
+.infoblock h2{
+  margin-bottom: 0px;
+}
+.infoblock h1{
+  font-size: 45px;
+  font-weight: 300;
+  margin-top: 0px;
+}
+
+.playback{
+  text-align: center;
+}
+
+.bar-placeholder-outer{
+  height: 10px;
+  width: 100%;
+  position: relative;
+  background-color: #0E0D0F;
+}
+
+.bar-placeholder-inner{
+  top: 3px;
+  bottom: 3px;
+  width: 60%;
+  position: absolute;
+  background-color: #5C5C5C;
+}
+</style>

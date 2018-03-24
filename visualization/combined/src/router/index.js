@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import Overview from '@/components/Overview'
 import HelloWorld from '@/components/HelloWorld'
-import MainDashboard from '@/components/MainDashboard'
 
 Vue.use(Router)
 
@@ -9,12 +9,12 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'MainDashboard',
-      component: MainDashboard
+      name: 'Overview',
+      component: Overview
     },
     {
-      path: '/asdf',
-      name: 'HelloWorld',
+      path: '/info',
+      name: 'Info',
       component: HelloWorld
     }
   ]
