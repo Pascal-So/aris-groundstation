@@ -29,7 +29,7 @@
 
     <div class="grid">
       <div class="panel">
-        <h3>adsf</h3>
+        <Visualization/>
       </div>
       <div class="panel">
         <Graph title="Altitude"></Graph>
@@ -37,9 +37,12 @@
         
       </div>
       <div class="panel">
-        <h3>adsf</h3>
+        <h3>Events</h3>
+        <Eventlist/>
       </div>
     </div>
+
+    <br><br>
 
   </div>
 </template>
@@ -47,10 +50,14 @@
 <script>
 
 import Graph from './Graph.vue';
+import Eventlist from './Eventlist.vue';
+import Visualization from './Visualization.vue';
 
 export default {
   components: {
     'Graph': Graph,
+    'Eventlist': Eventlist,
+    'Visualization': Visualization,
   },
   name: 'Overview',
   data () {
@@ -69,9 +76,8 @@ export default {
 .grid{
   display: grid;
   grid-gap: 20px;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1.5fr 1.5fr 1fr;
   grid-auto-rows: auto;
-  height: 200px;
 }
 
 .flexrow{
@@ -118,5 +124,12 @@ export default {
   width: 60%;
   position: absolute;
   background-color: #5C5C5C;
+}
+
+@media(max-width: 1000px){
+  .grid{
+    grid-template-columns: 1fr;
+  }
+
 }
 </style>
