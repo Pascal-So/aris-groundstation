@@ -29,7 +29,7 @@
 
     <div class="grid">
       <div class="panel">
-        <Visualization/>
+        <Visualization class="fill"/>
       </div>
       <div class="panel">
         <Graph title="Altitude"></Graph>
@@ -75,7 +75,7 @@ export default {
 
 .grid{
   display: grid;
-  grid-gap: 20px;
+  grid-gap: 13px;
   grid-template-columns: 1.5fr 1.5fr 1fr;
   grid-auto-rows: auto;
 }
@@ -91,6 +91,16 @@ export default {
   box-sizing: border-box;
   padding: 0 10px;
   border-radius: 3px;
+  position: relative;
+  box-shadow: 4px 4px rgba(0,0,0,0.3);
+}
+
+.fill{
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 10px;
+  right: 0;
 }
 
 .infoblock{

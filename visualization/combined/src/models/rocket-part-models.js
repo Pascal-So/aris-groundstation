@@ -20,8 +20,8 @@ const outlinemat = new THREE.MeshBasicMaterial({
 const loader = new THREE.JSONLoader();
 
 function load(json, mat) {
-    const geometry = loader.parse(json);
-    return new THREE.Mesh(geometry, mat);
+    const parsed = loader.parse(json);
+    return new THREE.Mesh(parsed.geometry, mat);
 }
 
 export default {
