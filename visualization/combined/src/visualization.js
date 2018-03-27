@@ -33,7 +33,7 @@ function RocketViz(element){
 
   // public methods
   this.animate = () => {
-    //requestAnimationFrame( scope.animate );
+    requestAnimationFrame( scope.animate );
     stats.begin();
     
     var rx, ry, rz, rw;
