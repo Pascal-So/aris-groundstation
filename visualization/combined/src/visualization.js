@@ -21,7 +21,7 @@ function RocketViz(element){
   var firstquat = -1;
 
   const MAX_POINTS = 10000;
-  const bgcol = 0x121214;
+  const bgcol = 0x151417;
 
   const rocketOffset = new THREE.Vector3(0,0.9,0);
   const cameraOffset = new THREE.Vector3(1,2,4);
@@ -30,11 +30,68 @@ function RocketViz(element){
   var i = 0;
   const rotdata = Flightdata;
 
-
   // public methods
+
+  /**
+   * Render the rocket at its new trajectory point, complete the trajectory
+   * line up to the current point. All points are added at once, rocket is moved
+   * to the last point in array.
+   *
+   * @param points  the new trajectory points since the last update. 
+                    format: [{pos: {x,y,z}, rot: {x,y,z,w}}]
+   */
+  this.render = (points) => {
+    if(points.length == 0){
+      return;
+    }
+
+    // convert to y-up
+    points = points.map(p => {
+      var x,y,z;
+      [x,y,z] = [p.pos.x, p.pos.z, -p.pos.y];
+      return {pos: {x: x, y: y, z: z}, rot: p.rot};
+    });
+
+    // set rocket pos rot
+
+    const latest = points[points.length - 1];
+
+    var quat = new THREE.Quaternion(latest.rot.x, latest.rot.y, latest.rot.z, latest.rot.w);
+    if(firstquat === -1){
+      firstquat = quat.clone();
+      firstquat.inverse();
+    }
+    quat.multiply(new THREE.Quaternion(0, 0, -0.7071, 0.7071));
+    quat.premultiply(new THREE.Quaternion(-0.7071, 0, 0, 0.7071));
+    rocket.quaternion.set(quat.x, quat.y, quat.z, quat.w);
+
+
+    // update trail
+
+    //const positions = points.map(p => p.pos);
+
+    var positions = trajectory_line.geometry.attributes.position.array;
+
+    points.forEach(p => {
+      // check if positions array is full
+      // yes -> empty array
+
+      // push back like this
+      positions[i * 3] = px;
+      positions[i * 3 + 1] = py;
+      positions[i * 3 + 2] = pz;
+    });
+    trajectory_line.geometry.setDrawRange(0, i+1);
+
+    // https://stackoverflow.com/a/36498386 this had me very confused for a while...
+    trajectory_line.geometry.computeBoundingSphere();
+    trajectory_line.geometry.attributes.position.needsUpdate = true;
+
+  }
+
   this.animate = () => {
     requestAnimationFrame( scope.animate );
-    stats.begin();
+    //stats.begin();
     
     var rx, ry, rz, rw;
     var px, py, pz, pz2;
@@ -78,24 +135,17 @@ function RocketViz(element){
     trajectory_line.geometry.computeBoundingSphere();
     trajectory_line.geometry.attributes.position.needsUpdate = true;
 
-
     rocket.position.set(px, py, pz);
     rocket.position.add(rocketOffset);
 
-    // camera.position.set(px, py, pz);
-    // camera.position.add(cameraOffset);
-
     controls.update();
-
-    var offset = new THREE.Vector3(0.1, 0, 0).applyQuaternion(camera.quaternion);
-
     
     ++i;
     i%= rotdata.results[0].series[0].values.length;
     
     renderer.render( scene, camera );
 
-    stats.end();
+    //stats.end();
   }
   
   var scope = this;
@@ -103,17 +153,20 @@ function RocketViz(element){
   // private methods
   function init(){
     
-    console.log(scope.element.clientWidth, 'clientWidth');
-    console.log(scope.element.clientHeight, 'clientHeight');
+    const width = scope.element.clientWidth;
+    const height = scope.element.clientHeight;
 
-    camera = new THREE.PerspectiveCamera( 70, scope.element.clientWidth / scope.element.clientHeight, 0.01, 100000 );
+    console.log(width, 'clientWidth');
+    console.log(height, 'clientHeight');
+
+    camera = new THREE.PerspectiveCamera( 70, width / height, 0.01, 100000 );
     camera.position.set(cameraOffset.x, cameraOffset.y, cameraOffset.z);
     camera.position.add(cameraOffset);
     camera.rotation.set(-0.4,0,0);
 
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( scope.element.clientWidth, scope.element.clientHeight );
+    renderer.setSize( width, height );
     renderer.setClearColor( bgcol );
 
     scene = new THREE.Scene();
@@ -151,9 +204,9 @@ function RocketViz(element){
     controls.followTarget = true;
     
     // add stats
-    stats = new Stats.Stats();
-    stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-    scope.element.appendChild( stats.dom );
+    //stats = new Stats.Stats();
+    //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    //scope.element.appendChild( stats.dom );
 
     window.addEventListener( 'resize', onWindowResize, false );
 
@@ -167,12 +220,23 @@ function RocketViz(element){
   }
 
   function onWindowResize() {
-    camera.aspect = scope.element.clientWidth / scope.element.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize( scope.element.clientWidth, scope.element.clientHeight );
+    function actuallyResize(){
+      const width = scope.element.clientWidth;
+      const height = scope.element.clientHeight;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize( width, height );  
+    }
+
+    setTimeout(actuallyResize, 300);
   }
 
+  // We first initialize everything, then after a while check the new dom element dimensions,
+  // and resize the visualization. When initially loading the page, the dom element height
+  // might not be correct yet, as the graphs and eventlog are affecting it.
   init();
+  onWindowResize()
 }
 
 export default RocketViz;

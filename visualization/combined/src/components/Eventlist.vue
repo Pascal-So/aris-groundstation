@@ -27,7 +27,7 @@ export default {
           time: 0
         },
         {
-          message: 'Engine Burnout',
+          message: 'U fuekd up',
           severity: 5,
           time: 12.89
         }

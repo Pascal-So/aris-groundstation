@@ -32,13 +32,13 @@
         <Visualization class="fill"/>
       </div>
       <div class="panel">
-        <Graph title="Altitude"></Graph>
-        <Graph title="Temperature"></Graph>
-        
-      </div>
-      <div class="panel">
         <h3>Events</h3>
         <Eventlist/>
+      </div>
+      <div class="panel area-c">
+        <Graph title="Altitude"></Graph>
+        <Graph title="Temperature"></Graph>
+        <Graph title="Temperature"></Graph>
       </div>
     </div>
 
@@ -76,7 +76,7 @@ export default {
 .grid{
   display: grid;
   grid-gap: 13px;
-  grid-template-columns: 1.5fr 1.5fr 1fr;
+  grid-template-columns: 1.5fr 1fr 1.5fr;
   grid-auto-rows: auto;
 }
 
@@ -99,7 +99,7 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  bottom: 10px;
+  bottom: 0;
   right: 0;
 }
 
@@ -138,7 +138,18 @@ export default {
 
 @media(max-width: 1000px){
   .grid{
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 0.5fr;
+    grid-template-areas: 
+        "a b"
+        "c c";
+  }
+
+  .area-c{
+    grid-area: c;
+  }
+
+  .panel{
+    min-height: 600px;
   }
 
 }
