@@ -1,6 +1,7 @@
 const Influx = require('influx');
 const express = require('express');
 
+// ################## IFDB magic functions ######################
 
 function selectString(fields, measurement, start_time, end_time){
     const str = `SELECT ${fields.map(name => `first(${name}) as ${name}`).join(', ')} FROM ${measurement} `
@@ -10,6 +11,12 @@ function selectString(fields, measurement, start_time, end_time){
 
 // assumes that `fields` is not empty, and that no
 // measurement is called 'time'
+
+/**
+ * Assumes that `fields` is not empty, and that no measurement is called 'time'.
+ * @param array fields   [pos: ['x', 'y', 'z'], rot: [...], ...]
+ * @return Promise
+ */
 function runQueries(influx, fields, start_time, end_time){
     const promises = Object.keys(fields).map(key => {
         const query = selectString(fields[key], key, start_time, end_time);
@@ -41,12 +48,14 @@ function runQueries(influx, fields, start_time, end_time){
 }
 
 /**
- * Get from db everything between start_time and latest entry in reference field.
+ * Get from db everything between start_time and latest entry in reference
+ * field
+ * Time coordinate is always data time
  *
  * @param string start_time
  * @return Promise
  */
-function getNewData(start_time = null){
+function getDataRange(start_time = null){
     // reference field from reference table is assumed to be recorded often, so the last timestamp on
     // this record is assumed to be the last timestamp overall (or close to). Same for the first.
     const reference_table = 'pos';
@@ -56,10 +65,10 @@ function getNewData(start_time = null){
         start_time = null;
     }
 
-    var prom = null;
+    var promise = null;
 
     if(start_time === null){
-        prom = influx.query(`SELECT first(${reference_field}) FROM ${reference_table}`)
+        promise = influx.query(`SELECT first(${reference_field}) FROM ${reference_table}`)
             .then(result => {
                 if(result.length == 0){
                     return Promise.reject(new Error('No data in db'));
@@ -68,13 +77,14 @@ function getNewData(start_time = null){
                 return result[0].time.getNanoTime();
             });
     }else{
-        prom = new Promise((res, rej) => res(start_time));
+        promise = new Promise((res, rej) => res(start_time));
     }
+    const promise_end = influx.query(`SELECT last(${reference_field}) FROM ${reference_table}`);
 
-    return Promise.all([prom, influx.query(`SELECT last(${reference_field}) FROM ${reference_table}`)])
-        .then(results => {
-            start_time = results[0];
-            end_time = results[1][0].time.getNanoTime();
+    return Promise.all([promise_start, promise_end])
+        .then(promise_results => {
+            start_time = promise_results[0];
+            const end_time = promise_results[1][0].time.getNanoTime();
 
             const fields = {
                 'pos': ['x', 'y', 'z'],
@@ -106,19 +116,123 @@ const influx = new Influx.InfluxDB({
 });
 
 
-// Constants
+// ##################### Server config #####################
 const PORT = 8080;
 const HOST = '0.0.0.0';
+const send_max_frames = 10000;
 
-// App
+
+// ###################### THE STATE ###########################
+var state = {
+    data: null,
+    acquired_data_server_time: 0, // timestamp in server time
+    updating: true,
+};
+
+// larger values for keep_data_duration means more lag for playback, but also
+// less refetching from the db. Increase when expecing clients with large ping
+// times.
+const keep_data_duration = 1000; // millisecond duration
+
+function cachedDataRange(){
+    if(state.data === null || state.data.length == 0){
+        return null;
+    }
+
+    const start = state.data[0].time;
+    const end = state.data[state.data.length - 1].time;
+
+    return {
+        start: start,
+        end: end,
+    }
+}
+
+function keepStateUpdated(){
+    let current_server_time = Date.now(); // server time in ms timestamp
+    let update_server_time = state.acquired_data_server_time + keep_data_duration;
+    if((state.data === null || current_server_time > update_server_time) && !state.updating){
+        // update state
+        console.log('Updating cached flight data with new data from IFDB.');
+        state.updating = true;
+
+        const range = cachedDataRange();
+        const last_data_time = range ? range.end : null;
+        
+        getDataRange(last_data_time).then(data => {
+            state.acquired_data_server_time = Date.now();
+            state.data = data;
+            state.updating = false;
+        });
+    }else{
+        // do nothing, we still have relatively fresh data in cache
+    }
+}
+
+
+
+// ############### hanle HTTP requests ##########################
+
+/* response data format
+{
+    data: [
+        {
+            pos: {
+                x: 5,
+                y: 7,
+                z: 1,
+            },
+            ...
+        }
+    ],
+    info: {
+    }
+}
+*/
+
+const use_cache = false;
 const app = express();
 app.get('/getdata', (req, res) => {
-    const start_time = req.query.start;
-    getNewData(req.query.start).then(data => {
-        console.log(`Requested with start time ${start_time}, returned ${data.length} rows.`);
-        
-        res.json(data.slice(-2000));
+
+    if(use_cache) keepStateUpdated();
+
+    // exclusive start of requested time interval, given in data time coordinates
+    const start_data_time = req.query.start;
+
+    if(use_cache){
+        const cached_range = cachedDataRange();
+        if(cached_range !== null && start_data_time > cached_range.end){
+            // don't have this data yet
+            res.json(null);
+            return;
+        }
+        if(cached_range !== null && cached_range.start <= start_data_time){
+            const response_data = state.data.filter(frame => {
+                frame.time > start_time;
+            });
+
+            const response = {
+                data: response_data.slice(send_max_frames),
+                //info: {
+                    //newer_data_available: (response_data.length > send_max_frames),
+                //},
+            }
+
+            res.json(response);
+            return;
+        }
+    }
+
+    // fetch data from older time range for this request
+    const response_data = getDataRange(start_data_time);
+    res.json({
+        data: response_data.slice(send_max_frames),
+        //info: {},
     });
+});
+
+app.get('/helloworld', (req, res) => {
+    res.json("hello world");
 });
 
 app.listen(PORT, HOST);

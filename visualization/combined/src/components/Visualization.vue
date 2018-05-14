@@ -7,24 +7,26 @@
 <script>
 
 import RocketViz from '../visualization.js';
-import * as THREE from 'three';
-import OrbitControls from 'orbit-controls-es6'
-import Flightdata from '../flightdata/mestral.js';
+
+//import Flightdata from '../flightdata/mestral.js';
+
+import { EventBus } from '../event-bus.js';
+
 export default {
   name: 'Visualization',
   data () {
     return {
       rocketviz: null,
-      rocketdata: this.formatIFDBData(Flightdata),
+      //rocketdata: this.formatIFDBData(Flightdata),
     }
   },
   mounted () {
     this.rocketviz = new RocketViz(this.$refs.visualization);
 
-    var i = 0;
+    /*var i = 0;
     var scope = this;
     function render () {
-      requestAnimationFrame( render );
+      //requestAnimationFrame( render );
 
       const step = 10;
       if (i + step > scope.rocketdata.length) {
@@ -36,13 +38,17 @@ export default {
       i += step;
     }
 
-    render();
+    render();*/
 
-    //this.rocketviz.animate();
+    EventBus.$on('new-data', this.updateRocketViz);
 
   },
   methods: {
-    formatIFDBData (ifdb_data) {
+    updateRocketViz (data) {
+      this.rocketviz.render(data);
+    }
+
+    /*formatIFDBData (ifdb_data) {
       console.log(ifdb_data);
 
       var out = [];
@@ -62,7 +68,7 @@ export default {
       });
 
       return out;
-    }
+    }*/
   }
 }
 </script>
