@@ -5,7 +5,7 @@ const express = require('express');
 
 function selectString(fields, measurement, start_time, end_time){
     const str = `SELECT ${fields.map(name => `first(${name}) as ${name}`).join(', ')} FROM ${measurement} `
-        + `WHERE time > ${start_time} and time < ${end_time} GROUP BY time(50ms) fill(previous) limit 10000`;
+        + `WHERE time > ${start_time} and time < ${end_time} GROUP BY time(50ms) fill(previous) limit 9990`;
     return str;
 }
 
@@ -61,14 +61,17 @@ function getDataRange(start_time = null){
     const reference_table = 'pos';
     const reference_field = 'x';
 
-    if(start_time && !start_time.match(/^[0-9]+$/)){
-        start_time = null;
+    if(typeof start_time !== 'string' ||
+       start_time === '' ||
+       !start_time.match(/^[0-9]+$/)){
+
+        start_time = null
     }
 
-    var promise = null;
+    var promise_start = null;
 
     if(start_time === null){
-        promise = influx.query(`SELECT first(${reference_field}) FROM ${reference_table}`)
+        promise_start = influx.query(`SELECT first(${reference_field}) FROM ${reference_table}`)
             .then(result => {
                 if(result.length == 0){
                     return Promise.reject(new Error('No data in db'));
@@ -77,7 +80,7 @@ function getDataRange(start_time = null){
                 return result[0].time.getNanoTime();
             });
     }else{
-        promise = new Promise((res, rej) => res(start_time));
+        promise_start = new Promise((res, rej) => res(start_time));
     }
     const promise_end = influx.query(`SELECT last(${reference_field}) FROM ${reference_table}`);
 
@@ -102,8 +105,8 @@ function fixTimestamps(data){
 }
 
 const influx = new Influx.InfluxDB({
-  host: '159.89.2.225',
-  database: 'sim',
+  host: 'localhost',
+  database: 'flight',
   schema: [
     {
       measurement: 'pos',
@@ -119,7 +122,9 @@ const influx = new Influx.InfluxDB({
 // ##################### Server config #####################
 const PORT = 8080;
 const HOST = '0.0.0.0';
+
 const send_max_frames = 10000;
+const use_cache = false;
 
 
 // ###################### THE STATE ###########################
@@ -190,14 +195,18 @@ function keepStateUpdated(){
 }
 */
 
-const use_cache = false;
+
 const app = express();
-app.get('/getdata', (req, res) => {
+app.get('/get-data', (req, res) => {
 
     if(use_cache) keepStateUpdated();
 
+    console.log(req.query);
+
     // exclusive start of requested time interval, given in data time coordinates
     const start_data_time = req.query.start;
+
+    console.log(`Received request for data form ${start_data_time}.`);
 
     if(use_cache){
         const cached_range = cachedDataRange();
@@ -208,7 +217,10 @@ app.get('/getdata', (req, res) => {
         }
         if(cached_range !== null && cached_range.start <= start_data_time){
             const response_data = state.data.filter(frame => {
-                frame.time > start_time;
+                // TODO: this part is wrong. We can't just compare the data times here,
+                // because these timestamps are stored as strings (might be too big for
+                // storing as int), so comparison does not give meaningful results.
+                frame.time > start_time; 
             });
 
             const response = {
@@ -224,11 +236,22 @@ app.get('/getdata', (req, res) => {
     }
 
     // fetch data from older time range for this request
-    const response_data = getDataRange(start_data_time);
-    res.json({
-        data: response_data.slice(send_max_frames),
-        //info: {},
+    getDataRange(start_data_time).then(response_data => {
+        //console.log(`Requested data from ${start_data_time}:`, response_data);
+        res.json({
+            data: response_data, //.slice(send_max_frames),
+            //info: {},
+        });
+    }).catch(error => {
+        console.log(error.message);
+        /*res.json({
+            error: error,
+        })*/
     });
+});
+
+app.get('/get-newest', (req, res) => {
+    // todo
 });
 
 app.get('/helloworld', (req, res) => {
