@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+
+  receiver:
+    build: ./rfInterface/
+    devices:
+      - "/dev/ttyUSB2:/USB"
+
+  influx:
+    image: influxdb:1.4
+  #   ports:
+  #     - 8086:8086
+
+  #grafana:
+  #  image: grafana/grafana
+  #  ports:
+  #    - 3000:3000
+
+  #apache:
+  #  image: httpd:2.4
+  #  environment:
+  #    - VIRTUAL_HOST=visualization.codelis.local
+  #  volumes:
+  #    - ./archive:/usr/local/apache2/htdocs/
+
+  #nginx-proxy:
+  #  image: jwilder/nginx-proxy
+  #  volumes:
+  #    - /var/run/docker.sock:/tmp/docker.sock
+  #  ports:
+  #    - 80:80

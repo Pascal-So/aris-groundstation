@@ -13,11 +13,17 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 from digi.xbee.devices import XBeeDevice
+from influxdb import InfluxDBClient
 
-# TODO: Replace with the serial port where your local module is connected to. 
-PORT = "/dev/ttyUSB1"
+import time
+
+# connected to /dev/ttyUSBx in docker compose file
+PORT = "/USB"
+# PORT = "/dev/ttyUSB2"
 # TODO: Replace with the baud rate of your local module.
 BAUD_RATE = 9600
+
+DATABASE = "test"
 
 # some notes:
 # on my machine this needs to be run as admin, which means the digi-xbee
@@ -26,18 +32,36 @@ BAUD_RATE = 9600
 # prints content of all received packets to stdout, with newline between them.
 # terminate with ctrl-c
 
+client = InfluxDBClient('influx', 8086, 'root', 'root', DATABASE)
+
+def parseMessage(message):
+    return [
+        {
+            "measurement": "pos",
+            "time": "10000000",
+            "fields": {
+                "value": 0.64
+            }
+        }
+    ]
+
 def main():
+
     device = XBeeDevice(PORT, BAUD_RATE)
 
     try:
         device.open()
 
         def data_receive_callback(xbee_message):
-            print(xbee_message.data.decode())
+            message = xbee_message.data.decode()
+            data = parseMessage(message)
+            client.write_points(data)
+            print("Received:", message, flush=True)
 
         device.add_data_received_callback(data_receive_callback)
 
-        input()
+        while True:
+            time.sleep(1)
 
     finally:
         if device is not None and device.is_open():

@@ -4,8 +4,8 @@ services:
 
   influx:
     image: influxdb:1.4
-    ports:
-      - 8086:8086
+    #ports:
+    #  - 8086:8086
 
   mysql:
     image: mysql:5.7.21
@@ -39,8 +39,8 @@ services:
       - MYSQL_DATABASE=mediawiki
       - MYSQL_USER=root
       - MYSQL_PASSWORD=asdfasdf
-    # volumes:
-    #   - ./mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
+    volumes:
+      - ./mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
 
   apache:
     image: httpd:2.4

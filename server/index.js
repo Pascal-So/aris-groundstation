@@ -18,6 +18,7 @@ function selectString(fields, measurement, start_time, end_time){
 function runQueries(influx, fields, start_time, end_time){
     const promises = Object.keys(fields).map(key => {
         const query = selectString(fields[key], key, milliToNano(start_time), milliToNano(end_time));
+        console.log("query:", query);
         return influx.query(query)
             .then(data => {
                 return {'key': key, 'values': data};
@@ -52,7 +53,7 @@ function nanoToMilli(nano_timestamp){
 
 function milliToNano(milli_timestamp){
     const nano_timestamp = milli_timestamp + "000000";
-    return milli_timestamp;
+    return nano_timestamp;
 }
 
 /**
@@ -85,7 +86,7 @@ function getDataRange(start_time = null){
                     return Promise.reject(new Error('No data in db'));
                 }
 
-                return result[0].time.getNanoTime();
+                return nanoToMilli(result[0].time.getNanoTime());
             });
     }else{
         promise_start = new Promise((res, rej) => res(start_time));
@@ -95,8 +96,8 @@ function getDataRange(start_time = null){
     return Promise.all([promise_start, promise_end])
         .then(promise_results => {
             start_time = promise_results[0];
-            const end_time = promise_results[1][0].time.getNanoTime();
-            //console.log('start_time end_time', start_time, end_time);
+            const end_time = nanoToMilli(promise_results[1][0].time.getNanoTime());
+            console.log(`Query start time: ${start_time}, end time: ${end_time}.`);
 
             const fields = {
                 'pos': ['x', 'y', 'z'],
@@ -205,8 +206,6 @@ app.use(cors());
 app.get('/get-data', (req, res) => {
 
     if(use_cache) keepStateUpdated();
-
-    console.log(req.query);
 
     // inclusive start of requested time interval, given in data time coordinates
     const start_data_time = req.query.start;

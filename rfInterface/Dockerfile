@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "python", "./receive.py" ]
+CMD python receive.py && tail -f requirements.txt

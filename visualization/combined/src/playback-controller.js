@@ -1,51 +1,61 @@
 import { EventBus } from './event-bus';
-import FetchLoop from './data-fetcher';
+import { getNewData } from './data-fetcher';
 import Config from './config';
 
 
-// the timestamps are in nanoseconds and might be too big to store
-// as a number, so we have to compare strings.
-function compare_data_times(time_a, time_b){
-    const maxlen = Math.max(time_a.length, time_b.length);
-
-    time_a = time_a.padStart(maxlen, '0');
-    time_b = time_b.padStart(maxlen, '0');
-
-    if(time_a < time_b){
-        return -1;
-    }else if(time_a === time_b){
-        return 0;
-    }else{
-        return 1;
-    }
-}
-
 function PlaybackController(){
-    var loop;
-    var paused;
-
+    var playing;
+    var last_requested_time;
     var playback_timer;
 
     const view_update_interval = Config.data_frames_interval * Config.data_frames_per_view_update;
 
+    const viewLoop = () => {
+
+        const new_playback_time = playback_timer + view_update_interval;
+
+        
+
+        if(playing){
+            window.setTimeout(viewLoop, view_update_interval);
+        }
+    }
+
+    const getNewData = (start_time = null) => {
+        const url = Config.fetch_url + `/get-data?start=${start_time}`;
+
+        console.log(`Fetching from '${url}'`);
+
+        return fetch(url)
+            .then(res => res.json()) // res.json() returns another promise idk parsing is hard i guess
+            .then(res => {
+                // ignore every response but the one we actually requested.
+                if(start_time !== last_requested_time){
+                    return [];
+                }else{
+                    return res.data;
+                }
+            });
+    }
+
     const setupListeners = () => {
         EventBus.$on('change-playback-time', (new_time) => {
-            loop.setTime(new_time);
+            playback_timer = new_time;            
         });
 
         EventBus.$on('stop', () => {
-            paused = true;
-            loop.stop();
+            playing = false;
+            
         });
 
         EventBus.$on('pause', () => {
-            paused = true;
-            loop.stop();
+            playing = false;
+            
         });
 
         EventBus.$on('play', () => {
-            paused = false;
-            loop.resume();
+            playing = true;
+            
         });
     }
 
@@ -54,8 +64,9 @@ function PlaybackController(){
             return;
         }
 
-        if(stored_data.length == 0){
+        if(stored_data.length == 0 || jumped_outside_range){
             stored_data = new_data;
+            jumped_outside_range = false;
             return;
         }
 
@@ -63,29 +74,24 @@ function PlaybackController(){
         const oldest = stored_data[0].time;
         const newest = stored_data[stored_data.length - 1].time;
 
-        if(compare_data_times(oldest, new_data_start_time) < 0 && compare_data_times(new_data_start_time, newest) >= 0){
-            // 
+        if(oldest < new_data_start_time && new_data_start_time >= newest + Config.data_frames_interval){
+            stored_data += new_data.filter(frame => {
+                frame.time > newest;
+            });
         }
+
+        console.log("Unreachable state reached: returned data not adjacent to stored range for adjacent request."
+            , oldest, newest, new_data_start_time);
     }
 
     const init = () => {
-        paused = false;
+        playing = true;
         playback_timer = null;
-
-        loop = new DataFetcher(Config.fetch_interval, (response) => {
-            console.log(`Received ${response.data.length} frames from server.`);
-
-            EventBus.$emit('new-data', response.data);
-        });
 
         setupListeners();
     }
 
-
-    
-
     init();
 }
-
 
 export default PlaybackController;
