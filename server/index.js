@@ -1,16 +1,14 @@
 const Influx = require('influx');
 const express = require('express');
+const cors = require('cors');
 
 // ################## IFDB magic functions ######################
 
 function selectString(fields, measurement, start_time, end_time){
     const str = `SELECT ${fields.map(name => `first(${name}) as ${name}`).join(', ')} FROM ${measurement} `
-        + `WHERE time > ${start_time} and time < ${end_time} GROUP BY time(50ms) fill(previous) limit 9990`;
+        + `WHERE time >= ${start_time} and time < ${end_time} GROUP BY time(50ms) fill(previous) limit 9990`;
     return str;
 }
-
-// assumes that `fields` is not empty, and that no
-// measurement is called 'time'
 
 /**
  * Assumes that `fields` is not empty, and that no measurement is called 'time'.
@@ -19,7 +17,7 @@ function selectString(fields, measurement, start_time, end_time){
  */
 function runQueries(influx, fields, start_time, end_time){
     const promises = Object.keys(fields).map(key => {
-        const query = selectString(fields[key], key, start_time, end_time);
+        const query = selectString(fields[key], key, milliToNano(start_time), milliToNano(end_time));
         return influx.query(query)
             .then(data => {
                 return {'key': key, 'values': data};
@@ -35,7 +33,7 @@ function runQueries(influx, fields, start_time, end_time){
             var out = [];
             for(var i = 0; i < n; ++i){
                 var values = {};
-                values['time'] = data[0].values[i].time.getNanoTime();
+                values['time'] = nanoToMilli(data[0].values[i].time.getNanoTime());
                 for(var j = 0; j < k; ++j){
                     var vals = data[j].values[i];
                     delete vals.time;
@@ -45,6 +43,16 @@ function runQueries(influx, fields, start_time, end_time){
             }
             return out;
         });
+}
+
+function nanoToMilli(nano_timestamp){
+    const milli_timestamp = nano_timestamp.substring(0, nano_timestamp.length - 6)
+    return milli_timestamp; // TODO should convert this to int
+}
+
+function milliToNano(milli_timestamp){
+    const nano_timestamp = milli_timestamp + "000000";
+    return milli_timestamp;
 }
 
 /**
@@ -88,6 +96,7 @@ function getDataRange(start_time = null){
         .then(promise_results => {
             start_time = promise_results[0];
             const end_time = promise_results[1][0].time.getNanoTime();
+            //console.log('start_time end_time', start_time, end_time);
 
             const fields = {
                 'pos': ['x', 'y', 'z'],
@@ -98,11 +107,6 @@ function getDataRange(start_time = null){
         });
 }
 
-function fixTimestamps(data){
-    data.map(row => {
-        row.time = row.time.getNanoTime();
-    });
-}
 
 const influx = new Influx.InfluxDB({
   host: 'localhost',
@@ -197,13 +201,14 @@ function keepStateUpdated(){
 
 
 const app = express();
+app.use(cors());
 app.get('/get-data', (req, res) => {
 
     if(use_cache) keepStateUpdated();
 
     console.log(req.query);
 
-    // exclusive start of requested time interval, given in data time coordinates
+    // inclusive start of requested time interval, given in data time coordinates
     const start_data_time = req.query.start;
 
     console.log(`Received request for data form ${start_data_time}.`);
@@ -220,7 +225,7 @@ app.get('/get-data', (req, res) => {
                 // TODO: this part is wrong. We can't just compare the data times here,
                 // because these timestamps are stored as strings (might be too big for
                 // storing as int), so comparison does not give meaningful results.
-                frame.time > start_time; 
+                frame.time >= start_time; 
             });
 
             const response = {
@@ -234,13 +239,14 @@ app.get('/get-data', (req, res) => {
             return;
         }
     }
-
     // fetch data from older time range for this request
     getDataRange(start_data_time).then(response_data => {
-        //console.log(`Requested data from ${start_data_time}:`, response_data);
+        console.log(`Sending ${response_data.length} back`);
         res.json({
             data: response_data, //.slice(send_max_frames),
-            //info: {},
+            info: {
+                requested_start: start_data_time,
+            },
         });
     }).catch(error => {
         console.log(error.message);
@@ -252,10 +258,6 @@ app.get('/get-data', (req, res) => {
 
 app.get('/get-newest', (req, res) => {
     // todo
-});
-
-app.get('/helloworld', (req, res) => {
-    res.json("hello world");
 });
 
 app.listen(PORT, HOST);

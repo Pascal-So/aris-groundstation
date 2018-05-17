@@ -10,6 +10,7 @@
   "author": "Pascal Sommer <p@pascalsommer.ch>",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.4",
     "express": "^4.16.2",
     "influx": "^5.0.7"
   }
