@@ -38,7 +38,7 @@ def parseMessage(message):
     return [
         {
             "measurement": "pos",
-            "time": "10000000",
+            "time": 10,
             "fields": {
                 "value": 0.64
             }
@@ -46,8 +46,9 @@ def parseMessage(message):
     ]
 
 def main():
-
     device = XBeeDevice(PORT, BAUD_RATE)
+
+    client.create_database(DATABASE)
 
     try:
         device.open()

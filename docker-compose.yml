@@ -5,7 +5,7 @@ services:
   receiver:
     build: ./rfInterface/
     devices:
-      - "/dev/ttyUSB2:/USB"
+      - "/dev/ttyUSB1:/USB"
 
   influx:
     image: influxdb:1.4
