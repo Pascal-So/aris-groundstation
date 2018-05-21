@@ -14,6 +14,7 @@
 
 from digi.xbee.devices import XBeeDevice
 from influxdb import InfluxDBClient
+import struct
 
 import time
 
@@ -34,11 +35,15 @@ DATABASE = "test"
 
 client = InfluxDBClient('influx', 8086, 'root', 'root', DATABASE)
 
-def parseMessage(message):
+def parseMessage(bytestream):
+    # bytestream unpacking: https://docs.python.org/3/library/struct.html#format-characters
+    # '>' denotes big endian
+    (timestamp, sensor_id, data) = struct.unpack('>HHI', bytestream);
+    
     return [
         {
             "measurement": "pos",
-            "time": 10,
+            "time": timestamp,
             "fields": {
                 "value": 0.64
             }
@@ -54,8 +59,8 @@ def main():
         device.open()
 
         def data_receive_callback(xbee_message):
-            message = xbee_message.data.decode()
-            data = parseMessage(message)
+            bytestream = xbee_message.data
+            data = parseMessage(bytestream)
             client.write_points(data)
             print("Received:", message, flush=True)
 
