@@ -229,9 +229,9 @@ app.get('/get-data', (req, res) => {
 
             const response = {
                 data: response_data.slice(send_max_frames),
-                //info: {
-                    //newer_data_available: (response_data.length > send_max_frames),
-                //},
+                info: {
+                    requested_start: start_data_time,
+                },
             }
 
             res.json(response);

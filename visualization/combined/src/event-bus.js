@@ -8,7 +8,9 @@ components is a function of just the new data, not the complete data back to the
 beginning of the recording, and it would be tedious to separate new from old data
 when passed down as props.
 
-Only has one channel: 'new-data'
+Channels: 
+    'new-data'
+    ...
 
 */
 

@@ -22,3 +22,15 @@ services:
       - ./container-data/grafana:/var/lib/grafana
     depends_on:
       - "influx"
+
+  #apache:
+  #  image: httpd:2.4
+  #  environment:
+  #    - VIRTUAL_HOST=visualization.codelis.local
+  #  volumes:
+  #    - ./visualization:/usr/local/apache2/htdocs/
+
+  data-provider:
+    build: ./server
+    ports:
+      - 8080:8080
