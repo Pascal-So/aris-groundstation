@@ -4,6 +4,7 @@ const cors = require('cors');
 
 // ################## IFDB magic functions ######################
 
+// construct InfluxDB query string
 function selectString(fields, measurement, start_time, end_time){
     const str = `SELECT ${fields.map(name => `first(${name}) as ${name}`).join(', ')} FROM ${measurement} `
         + `WHERE time >= ${start_time} and time < ${end_time} GROUP BY time(50ms) fill(previous) limit 9990`;
@@ -46,57 +47,67 @@ function runQueries(influx, fields, start_time, end_time){
         });
 }
 
+// nanosecond string to millisecond int
 function nanoToMilli(nano_timestamp){
     const milli_timestamp = nano_timestamp.substring(0, nano_timestamp.length - 6)
-    return milli_timestamp; // TODO should convert this to int
+    return parseInt(milli_timestamp);
 }
 
+// millisecond int to nanosecond string
 function milliToNano(milli_timestamp){
-    const nano_timestamp = milli_timestamp + "000000";
+    const nano_timestamp = milli_timestamp.toString() + "000000";
     return nano_timestamp;
 }
 
 /**
- * Get from db everything between start_time and latest entry in reference
- * field
+ * Get earliest and latest timestamp available for the specified reference table and field.
+ * Timestamps in milliseconds, int
+ *
+ * return Object  {start, end}
+ */
+function getRangeLimits(){
+    // reference field from reference table is assumed to be recorded often, so the last timestamp on
+    // this record is assumed to be the last timestamp overall (or close to). Same for the first.
+    const reference_table = 'pos';
+    const reference_field = 'x';
+
+    const promise_start = influx.query(`SELECT first(${reference_field}) FROM ${reference_table}`);
+    const promise_end = influx.query(`SELECT last(${reference_field}) FROM ${reference_table}`);
+
+    return Promise.all([promise_start, promise_end])
+        .then(promise_results => {
+            if(promise_results[0].length == 0){
+                return Promise.reject(new Error('No data in db'));
+            }
+
+            const start_time = nanoToMilli(promise_results[0][0].time.getNanoTime());
+            const end_time = nanoToMilli(promise_results[1][0].time.getNanoTime());
+            return {start: start_time, end: end_time};
+        });
+}
+
+/**
+ * Get from db everything between start_time and end of available range (see getRangeLimits)
  * Time coordinate is always data time
  *
  * @param string start_time
  * @return Promise
  */
 function getDataRange(start_time = null){
-    // reference field from reference table is assumed to be recorded often, so the last timestamp on
-    // this record is assumed to be the last timestamp overall (or close to). Same for the first.
-    const reference_table = 'pos';
-    const reference_field = 'x';
-
     if(typeof start_time !== 'string' ||
        start_time === '' ||
        !start_time.match(/^[0-9]+$/)){
 
-        start_time = null
+        start_time = null;
     }
 
-    var promise_start = null;
+    return getRangeLimits()
+        .then(limits => {
+            if(start_time === null){
+                start_time = limits.start;
+            }
+            const end_time = limits.end;
 
-    if(start_time === null){
-        promise_start = influx.query(`SELECT first(${reference_field}) FROM ${reference_table}`)
-            .then(result => {
-                if(result.length == 0){
-                    return Promise.reject(new Error('No data in db'));
-                }
-
-                return nanoToMilli(result[0].time.getNanoTime());
-            });
-    }else{
-        promise_start = new Promise((res, rej) => res(start_time));
-    }
-    const promise_end = influx.query(`SELECT last(${reference_field}) FROM ${reference_table}`);
-
-    return Promise.all([promise_start, promise_end])
-        .then(promise_results => {
-            start_time = promise_results[0];
-            const end_time = nanoToMilli(promise_results[1][0].time.getNanoTime());
             console.log(`Query start time: ${start_time}, end time: ${end_time}.`);
 
             const fields = {
@@ -107,7 +118,6 @@ function getDataRange(start_time = null){
             return runQueries(influx, fields, start_time, end_time);
         });
 }
-
 
 const influx = new Influx.InfluxDB({
   host: 'localhost',
@@ -128,7 +138,7 @@ const influx = new Influx.InfluxDB({
 const PORT = 8080;
 const HOST = '0.0.0.0';
 
-const send_max_frames = 10000;
+const send_max_frames = 200;//10000;
 const use_cache = false;
 
 
@@ -158,6 +168,9 @@ function cachedDataRange(){
     }
 }
 
+/*
+uncomment when cache is activated
+
 function keepStateUpdated(){
     let current_server_time = Date.now(); // server time in ms timestamp
     let update_server_time = state.acquired_data_server_time + keep_data_duration;
@@ -178,7 +191,7 @@ function keepStateUpdated(){
         // do nothing, we still have relatively fresh data in cache
     }
 }
-
+*/
 
 
 // ############### hanle HTTP requests ##########################
@@ -212,6 +225,8 @@ app.get('/get-data', (req, res) => {
 
     console.log(`Received request for data form ${start_data_time}.`);
     /*
+    commented out cache functionality to remove distraction for now
+
     if(use_cache){
         const cached_range = cachedDataRange();
         if(cached_range !== null && start_data_time > cached_range.end){
@@ -238,11 +253,14 @@ app.get('/get-data', (req, res) => {
             return;
         }
     }*/
-    // fetch data from older time range for this request
+
+
+    // fetch data from before cache
     getDataRange(start_data_time).then(response_data => {
-        console.log(`Sending ${response_data.length} back`);
+        const send_data = response_data.slice(0, send_max_frames);
+        console.log(`Sending ${send_data.length} back`);
         res.json({
-            data: response_data, //.slice(send_max_frames),
+            data: send_data,
             info: {
                 requested_start: start_data_time,
             },
@@ -250,7 +268,7 @@ app.get('/get-data', (req, res) => {
     }).catch(error => {
         console.log(error.message);
         /*res.json({
-            error: error,
+            error: error.message,
         })*/
     });
 });

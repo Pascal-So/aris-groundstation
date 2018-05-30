@@ -11,25 +11,20 @@
       </div>
       <div class="infoblock">
         <h2>Max Alt:</h2>
-        <h1>376.62m</h1>
+        <h1>{{ max_alt.toFixed(2) }}m</h1>
       </div>
     </div>
 
     <br>
 
-    <div class="playback">
-      <h2>T+04.38s</h2>
-      <div class="bar-placeholder-outer">
-        <div class="bar-placeholder-inner"></div>
-      </div>
-    </div>
+    <PlaybackControls/>
 
     <br>
     <br>
 
     <div class="grid">
       <div class="panel">
-        <Visualization class="fill"/>
+        <!-- <Visualization class="fill"/> -->
       </div>
       <div class="panel">
         <h3>Events</h3>
@@ -51,18 +46,32 @@
 
 import Graph from './Graph.vue';
 import Eventlist from './Eventlist.vue';
-import Visualization from './Visualization.vue';
+// import Visualization from './Visualization.vue';
+import { EventBus } from '../event-bus.js';
+import PlaybackControls from './PlaybackControls.vue';
 
 export default {
   components: {
     'Graph': Graph,
     'Eventlist': Eventlist,
-    'Visualization': Visualization,
+    // 'Visualization': Visualization,
+    'PlaybackControls': PlaybackControls,
   },
   name: 'Overview',
   data () {
     return {
-      
+      max_alt: 0,
+    }
+  },
+  mounted () {
+    EventBus.$on('new-data', this.updateMax);
+    EventBus.$on('reset-views', () => {this.max_alt = 0;});
+  },
+  methods: {
+    updateMax(data){
+      data.forEach(frame => {
+        this.max_alt = Math.max(this.max_alt, frame.pos.z);
+      });
     }
   }
 }
@@ -117,24 +126,6 @@ export default {
   margin-top: 0px;
 }
 
-.playback{
-  text-align: center;
-}
-
-.bar-placeholder-outer{
-  height: 10px;
-  width: 100%;
-  position: relative;
-  background-color: #0E0D0F;
-}
-
-.bar-placeholder-inner{
-  top: 3px;
-  bottom: 3px;
-  width: 60%;
-  position: absolute;
-  background-color: #5C5C5C;
-}
 
 @media(max-width: 1000px){
   .grid{

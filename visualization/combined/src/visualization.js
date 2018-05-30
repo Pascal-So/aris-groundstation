@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import OrbitControls from 'orbit-controls-es6'
+import OrbitControls from './OrbitControls.js'; //'orbit-controls-es6'
 import RocketPartModels from './models/rocket-part-models.js';
 const Stats = require('./stats.js');
 
@@ -18,6 +18,8 @@ function RocketViz(element){
   var trajectory_line;
   var stats;
   var firstquat = -1;
+
+  const USE_STATS = false;
 
   const MAX_TRAIL_POINTS = 10000;
   var current_trail_points = 0;
@@ -40,15 +42,14 @@ function RocketViz(element){
   }
 
   /**
-   * Render the rocket at its new trajectory point, complete the trajectory
-   * line up to the current point. All points are added at once, rocket is moved
+   * Add new data to the visualization, complete the trajectory line up
+   * to the current point. All points are added at once, rocket is moved
    * to the last point in array.
    *
    * @param points  the new trajectory points since the last update. 
                     format: [{pos: {x,y,z}, rot: {x,y,z,w}}]
    */
-  this.render = (points) => {
-    //stats.begin();
+  this.addData = (points) => {
     if(points.length == 0){
       return;
     }
@@ -110,10 +111,15 @@ function RocketViz(element){
     // https://stackoverflow.com/a/36498386 this had me very confused for a while...
     trajectory_line.geometry.computeBoundingSphere();
     trajectory_line.geometry.attributes.position.needsUpdate = true;
+  }
 
+  this.render = () => {
+    requestAnimationFrame(this.render);
+
+    if(USE_STATS) stats.begin();
     controls.update();
     renderer.render( scene, camera );
-    //stats.end();
+    if(USE_STATS) stats.end();
   }
 
   //////////// private methods
@@ -121,7 +127,7 @@ function RocketViz(element){
   var scope = this;
 
   function init(){
-    
+
     const width = scope.element.clientWidth;
     const height = scope.element.clientHeight;
 
@@ -172,14 +178,18 @@ function RocketViz(element){
     controls.target = rocket.position;
     controls.followTarget = true;
     
-    // add stats
-    //stats = new Stats.Stats();
-    //stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-    //scope.element.appendChild( stats.dom );
+    if(USE_STATS){
+      // add stats
+      stats = new Stats.Stats();
+      stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+      scope.element.appendChild( stats.dom );
+    }
 
     window.addEventListener( 'resize', onWindowResize, false );
 
     scope.element.appendChild( renderer.domElement );
+
+    scope.render();
   }
   
   function loadModels(rocket) {

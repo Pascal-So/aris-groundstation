@@ -1,13 +1,14 @@
 import { EventBus } from './event-bus';
 import Config from './config';
 
-
 function PlaybackController(){
     var playing;
     var last_requested_data_time;
     var playback_time; // in milliseconds data time
     var stored_data;
     var server_available_range;
+
+    const playback_speed = 1;
 
     var viewLoop_timeout_object; // storing the timeout that then calls the next viewLoop iteration
 
@@ -20,7 +21,7 @@ function PlaybackController(){
 
         if(!playing) return;
 
-        let new_playback_time = playback_time + view_update_interval;
+        var new_playback_time = playback_time + view_update_interval;
 
         const range = storedDataRange();
         if(range){
@@ -44,7 +45,7 @@ function PlaybackController(){
         }
 
         if(playing){
-            viewLoop_timeout_object = window.setTimeout(viewLoop, view_update_interval);
+            viewLoop_timeout_object = window.setTimeout(viewLoop, view_update_interval / playback_speed);
         }
     }
 
@@ -127,10 +128,9 @@ function PlaybackController(){
 
         if(range !== null && 
             new_data_start_time >= range.start && 
-            new_data_start_time <= range.end + Config.data_frames_interval){
-
+            new_data_start_time <= range.end + Config.data_frame_interval){
             const append_data = new_data.filter(frame => {
-                frame.time > range.end;
+                return frame.time > range.end;
             });
             stored_data = stored_data.concat(append_data);
         }else{
@@ -151,13 +151,20 @@ function PlaybackController(){
         getNewData()
             .then(() => {
                 const range = storedDataRange();
+                console.log("range:", range);
                 playback_time = range ? 
                     range.start : 
                     (server_available_range ?
                         server_available_range.start :
                         null);
                 playing = true;
+
+                if(server_available_range){
+                    EventBus.$emit('time-info', server_available_range);
+                }
+
                 viewLoop();
+                //window.setTimeout(() => {playing = false; console.log("stopping playback")}, 500);
             });
 
         setupListeners();

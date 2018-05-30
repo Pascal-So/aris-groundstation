@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     updateRocketViz (data) {
-      this.rocketviz.render(data);
+      this.rocketviz.addData(data);
     }
   }
 }

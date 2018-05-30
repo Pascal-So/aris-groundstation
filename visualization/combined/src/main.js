@@ -7,6 +7,21 @@ import PlaybackController from './playback-controller';
 
 Vue.config.productionTip = false;
 
+// utils
+Vue.mixin({
+    methods: {
+        renderTime: time => {
+            const rounded = time.toFixed(3);
+
+            if (time >= 0) {
+                return `T+${rounded}s`;
+            }else{
+                return `T${rounded}s`;
+            }
+        }
+    }
+});
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

@@ -33,17 +33,6 @@ export default {
         }
       ]
     }
-  },
-  methods: {
-    renderTime(time){
-      const rounded = time.toFixed(3);
-
-      if (time >= 0) {
-        return `T+${rounded}s`;
-      }else{
-        return `T${rounded}s`;
-      }
-    }
   }
 }
 </script>
