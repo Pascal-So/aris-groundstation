@@ -211,7 +211,7 @@ app.get('/get-data', (req, res) => {
     const start_data_time = req.query.start;
 
     console.log(`Received request for data form ${start_data_time}.`);
-
+    /*
     if(use_cache){
         const cached_range = cachedDataRange();
         if(cached_range !== null && start_data_time > cached_range.end){
@@ -237,7 +237,7 @@ app.get('/get-data', (req, res) => {
             res.json(response);
             return;
         }
-    }
+    }*/
     // fetch data from older time range for this request
     getDataRange(start_data_time).then(response_data => {
         console.log(`Sending ${response_data.length} back`);

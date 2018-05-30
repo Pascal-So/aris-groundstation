@@ -11,8 +11,7 @@
       <router-link :to="{name: 'Info'}" class="menu-entry" exact-active-class="menu-entry-active">Info</router-link>
 
       <br><br><br>
-      <a href="http://wp.codelis.local" class="menu-entry">Blog</a>
-      <a href="http://mw.codelis.local" class="menu-entry">Wiki</a>
+      <a href="https://aris-space.ch" class="menu-entry">ARIS homepage</a>
     </div>
     <div class="main">
       <router-view/>

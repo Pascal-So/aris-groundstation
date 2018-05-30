@@ -9,14 +9,18 @@ function PlaybackController(){
     var stored_data;
     var server_available_range;
 
-    const view_update_interval = Config.data_frames_interval * Config.data_frames_per_view_update;
+    var viewLoop_timeout_object; // storing the timeout that then calls the next viewLoop iteration
+
+    const view_update_interval = Config.data_frame_interval * Config.data_frames_per_view_update;
 
     const viewLoop = () => {
-        if(!playing){
-            return;
-        }
+        // stop other loop instances that might be running. This allows us to just call viewLoop() at
+        // any time without causing weird bugs.
+        window.clearTimeout(viewLoop_timeout_object);
 
-        const new_playback_time = playback_time + view_update_interval;
+        if(!playing) return;
+
+        let new_playback_time = playback_time + view_update_interval;
 
         const range = storedDataRange();
         if(range){
@@ -25,7 +29,8 @@ function PlaybackController(){
             new_playback_time = playback_time;
         }
 
-        if(range && (playback_time <= range.start || playback_time >= range.end)){
+        if(range && (playback_time < range.start || playback_time > range.end)){
+            console.log(playback_time);
             // we jumped outside the range and are still waiting for the data. Don't do anything.
         }else if(!range || playback_time + Config.fetch_ahead_time > range.end){
             getNewData(range ? range.end : playback_time);
@@ -33,14 +38,13 @@ function PlaybackController(){
             const show_data = stored_data.filter(frame => {
                 return frame.time >= playback_time && frame.time < new_playback_time;
             });
-            EventBus.$emit('new-data', data);
+            EventBus.$emit('new-data', show_data);
 
             playback_time = Math.max(playback_time, new_playback_time);
         }
 
-
         if(playing){
-            window.setTimeout(viewLoop, view_update_interval);
+            viewLoop_timeout_object = window.setTimeout(viewLoop, view_update_interval);
         }
     }
 
@@ -65,7 +69,11 @@ function PlaybackController(){
                     return res.data;
                 }
             })
-            .then(mergeData);
+            .then(mergeData)
+            .catch(err => {
+                console.log("fetch error:", err);
+                return []; // don't care. viewLoop will automatically retry.
+            });
     }
 
     const setupListeners = () => {
@@ -83,11 +91,11 @@ function PlaybackController(){
             }
 
             playback_time = new_time;
+            viewLoop(); // don't wait for next loop iteration
         });
 
         EventBus.$on('pause', () => {
             playing = false;
-            
         });
 
         EventBus.$on('play', () => {
@@ -97,7 +105,7 @@ function PlaybackController(){
     }
 
     const storedDataRange = () => {
-        if(stored_data == []){
+        if(stored_data.length == 0){
             return null;
         }
 
@@ -121,15 +129,16 @@ function PlaybackController(){
             new_data_start_time >= range.start && 
             new_data_start_time <= range.end + Config.data_frames_interval){
 
-            stored_data += new_data.filter(frame => {
+            const append_data = new_data.filter(frame => {
                 frame.time > range.end;
             });
-
-            return;
+            stored_data = stored_data.concat(append_data);
+        }else{
+            stored_data = new_data;
+            playback_time = new_data_start_time;
+            // reset views, e.g. clear trajectory line in 3d viz, because we'd have a jump otherwise
+            EventBus.$emit('reset-views');
         }
-
-        stored_data = new_data;
-        playback_time = new_data_start_time;
     }
 
     const init = () => {
@@ -137,10 +146,11 @@ function PlaybackController(){
         playback_time = null;
         stored_data = [];
         server_available_range = null;
+        viewLoop_timeout_object = null;
 
         getNewData()
             .then(() => {
-                range = storedDataRange();
+                const range = storedDataRange();
                 playback_time = range ? 
                     range.start : 
                     (server_available_range ?

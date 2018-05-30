@@ -10,7 +10,9 @@ when passed down as props.
 
 Channels: 
     'new-data'
-    ...
+    'reset-views'
+    'play'
+    'pause'
 
 */
 
