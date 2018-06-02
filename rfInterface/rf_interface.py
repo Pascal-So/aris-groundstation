@@ -3,7 +3,8 @@ import struct
 import time
 from datetime import datetime
 
-from receiver import receiver_listen, receiver_close
+from xbee import xbee_listen, xbee_send, xbee_close
+from control_server.control_server import run_control_server
 
 # some notes:
 # on my machine this needs to be run as admin, which means the digi-xbee
@@ -31,25 +32,24 @@ def data_receive_callback(xbee_message):
     ifdb_client.write_points(data)
     print("Received:", data, flush=True)
 
+def send_command_callback(command = None):
+    print("send_command called", flush=True)
+    #xbee_send("Send Command Test")
 
 def main():
     try:
-        database_name = datetime.now().strftime("flight-%Y-%m-%d-%H-%M-%S")
-        ifdb_client = InfluxDBClient('influx', 8086, 'root', 'root', database_name)
-        ifdb_client.create_database(database_name)
-
+        #database_name = datetime.now().strftime("flight-%Y-%m-%d-%H-%M-%S")
+        #ifdb_client = InfluxDBClient('influx', 8086, 'root', 'root', database_name)
+        #ifdb_client.create_database(database_name)
+        run_control_server(send_command_callback)
         while True:
-            #dummy_data = [{
-            #    "measurement": "temp",
-            #    "fields": {"value": 1.1}
-            #}]
-            # ifdb_client.write_points(dummy_data)
             time.sleep(1)
 
-        receiver_listen(data_receive_callback)
+        #xbee_listen(data_receive_callback)
 
     finally:
-        receiver_close()
+        pass
+        #xbee_close()
 
 if __name__ == '__main__':
     main()

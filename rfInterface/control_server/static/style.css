@@ -1,0 +1,15 @@
+body{
+    margin: 0;
+    padding: 30px;
+    background-color: #151417;
+    color: #cecece;
+    font-family: 'Console', monospace, mono;
+}
+
+a{
+    color: #cecece;
+}
+
+a:hover{
+    color: #f0f8ff;
+}
