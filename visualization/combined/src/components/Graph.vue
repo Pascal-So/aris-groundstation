@@ -20,33 +20,15 @@ export default {
   ],
   data () {
     return {
-      values: [],
       ctx: null,
       chart: null,
-      allData: [
-        {x: 0.005279, y: 0.001646189},
-        {x: 0.035572, y: 0.001104113},
-        {x: 0.042687, y: 0.005967639},
-        {x: 0.048275, y: 0.01248674},
-        {x: 0.054001, y: 0.02098171},
-        {x: 0.059685, y: 0.03152591},
-        {x: 0.065285, y: 1.08041411},
-        {x: 0.072222, y: 1.1085928},
-        {x: 0.077963, y: 1.1370033},
-        {x: 0.083656, y: 1.1844269},
-        {x: 0.08932, y: 1.2205278},
-        {x: 0.094979, y: 1.2683234},
-        {x: 0.094979, y: 1.2683234},
-        {x: 0.594979, y: 25.2683234},
-      ]
     }
   },
   methods: {
-    addData() {
-      var i = this.chart.data.datasets[0].data.length + 1;
-      if (i < this.allData.length) {
-        this.chart.data.datasets[0].data.push(this.allData[i]);
-      }
+    addData(data) {
+      if(data.length == 0) return;
+      console.log(`adding ${data.length} points to data`);
+      this.chart.data.datasets[0].data.push(...data);
       this.chart.update();
     }
   },

@@ -3,5 +3,5 @@ export default {
 
     data_frame_interval: 50, // ms, see influxdb query on server
     data_frames_per_view_update: 2,
-    fetch_ahead_time: 10 * 50, // ms
+    fetch_ahead_time: 20 * 50, // ms
 };

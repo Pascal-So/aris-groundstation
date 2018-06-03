@@ -2,12 +2,14 @@ const Influx = require('influx');
 const express = require('express');
 const cors = require('cors');
 
+const DATA_FRAME_INTERVAL = 50 // ms;
+
 // ################## IFDB magic functions ######################
 
 // construct InfluxDB query string
 function selectString(fields, measurement, start_time, end_time){
     const str = `SELECT ${fields.map(name => `first(${name}) as ${name}`).join(', ')} FROM ${measurement} `
-        + `WHERE time >= ${start_time} and time < ${end_time} GROUP BY time(50ms) fill(previous) limit 9990`;
+        + `WHERE time >= ${start_time} and time < ${end_time} GROUP BY time(${DATA_FRAME_INTERVAL}ms) fill(previous) limit 9990`;
     return str;
 }
 
@@ -59,6 +61,11 @@ function milliToNano(milli_timestamp){
     return nano_timestamp;
 }
 
+// Always rounds down to nearest multiple of granularity. e.g. (194, 50) -> 150
+function roundToInterval(value, granularity){
+    return value - (value % granularity);
+}
+
 /**
  * Get earliest and latest timestamp available for the specified reference table and field.
  * Timestamps in milliseconds, int
@@ -80,43 +87,37 @@ function getRangeLimits(){
                 return Promise.reject(new Error('No data in db'));
             }
 
-            const start_time = nanoToMilli(promise_results[0][0].time.getNanoTime());
-            const end_time = nanoToMilli(promise_results[1][0].time.getNanoTime());
+            const start_time = roundToInterval(nanoToMilli(promise_results[0][0].time.getNanoTime()), DATA_FRAME_INTERVAL);
+            const end_time = roundToInterval(nanoToMilli(promise_results[1][0].time.getNanoTime()), DATA_FRAME_INTERVAL);
             return {start: start_time, end: end_time};
         });
 }
 
 /**
  * Get from db everything between start_time and end of available range (see getRangeLimits)
- * Time coordinate is always data time
+ * Time coordinate is in data time, milliseconds
  *
- * @param string start_time
+ * @param int start_time
  * @return Promise
  */
-function getDataRange(start_time = null){
-    if(typeof start_time !== 'string' ||
-       start_time === '' ||
-       !start_time.match(/^[0-9]+$/)){
-
+function getDataRange(range_limits, start_time = null){
+    if(typeof start_time !== "number"){
         start_time = null;
     }
 
-    return getRangeLimits()
-        .then(limits => {
-            if(start_time === null){
-                start_time = limits.start;
-            }
-            const end_time = limits.end;
+    if(start_time === null){
+        start_time = range_limits.start;
+    }
+    const end_time = range_limits.end;
 
-            console.log(`Query start time: ${start_time}, end time: ${end_time}.`);
+    console.log(`Query start time: ${start_time}, end time: ${end_time}.`);
 
-            const fields = {
-                'pos': ['x', 'y', 'z'],
-                'rot': ['x', 'y', 'z', 'w']
-            };
+    const fields = {
+        'pos': ['x', 'y', 'z'],
+        'rot': ['x', 'y', 'z', 'w']
+    };
 
-            return runQueries(influx, fields, start_time, end_time);
-        });
+    return runQueries(influx, fields, start_time, end_time);
 }
 
 const influx = new Influx.InfluxDB({
@@ -182,11 +183,13 @@ function keepStateUpdated(){
         const range = cachedDataRange();
         const last_data_time = range ? range.end : null;
         
-        getDataRange(last_data_time).then(data => {
-            state.acquired_data_server_time = Date.now();
-            state.data = data;
-            state.updating = false;
-        });
+        getRangeLimits()
+            .then(range_limits => getDataRange(range_limits, last_data_time))
+            .then(data => {
+                state.acquired_data_server_time = Date.now();
+                state.data = data;
+                state.updating = false;
+            });
     }else{
         // do nothing, we still have relatively fresh data in cache
     }
@@ -220,8 +223,11 @@ app.get('/get-data', (req, res) => {
 
     if(use_cache) keepStateUpdated();
 
-    // inclusive start of requested time interval, given in data time coordinates
-    const start_data_time = req.query.start;
+    // inclusive start of requested time interval, given in ms since recording start
+    var start_data_time = parseInt(req.query.start);
+    if(isNaN(start_data_time)){
+        start_data_time = null;
+    }
 
     console.log(`Received request for data form ${start_data_time}.`);
     /*
@@ -256,26 +262,34 @@ app.get('/get-data', (req, res) => {
 
 
     // fetch data from before cache
-    getDataRange(start_data_time).then(response_data => {
-        const send_data = response_data.slice(0, send_max_frames);
-        console.log(`Sending ${send_data.length} back`);
-        res.json({
-            data: send_data,
-            info: {
-                requested_start: start_data_time,
-            },
+    var range_limits = null;
+    getRangeLimits()
+        .then(limits => {
+            range_limits = limits;
+            console.log(limits);
+            return getDataRange(range_limits, start_data_time + range_limits.start);
+        })
+        .then(response_data => {
+            const send_data = response_data.slice(0, send_max_frames).map(frame => {
+                frame.time -= range_limits.start;
+                return frame;
+            });
+            console.log(`Sending ${send_data.length} back`);
+            res.json({
+                data: send_data,
+                info: {
+                    requested_start: start_data_time,
+                    flight_data_duration: range_limits.end - range_limits.start,
+                },
+            });
+        }).catch(error => {
+            console.log(error.message);
+            /*res.json({
+                error: error.message,
+            })*/
         });
-    }).catch(error => {
-        console.log(error.message);
-        /*res.json({
-            error: error.message,
-        })*/
-    });
 });
 
-app.get('/get-newest', (req, res) => {
-    // todo
-});
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);

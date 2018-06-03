@@ -31,9 +31,10 @@
         <Eventlist/>
       </div>
       <div class="panel area-c">
-        <Graph title="Altitude"></Graph>
-        <Graph title="Temperature"></Graph>
-        <Graph title="Temperature"></Graph>
+
+        <Graph title="Altitude" ref="altitude_graph"></Graph>
+        <!-- <Graph title="Temperature"></Graph> -->
+        <!-- <Graph title="Temperature"></Graph> -->
       </div>
     </div>
 
@@ -64,14 +65,21 @@ export default {
     }
   },
   mounted () {
-    EventBus.$on('new-data', this.updateMax);
+    EventBus.$on('new-data', this.newData);
     EventBus.$on('reset-views', () => {this.max_alt = 0;});
   },
   methods: {
-    updateMax(data){
-      data.forEach(frame => {
+    newData(new_data){
+      new_data.forEach(frame => {
         this.max_alt = Math.max(this.max_alt, frame.pos.z);
       });
+
+      const altitude_data = new_data.map(frame => {return {
+        x: frame.time / 1000,
+        y: frame.pos.z,
+      };});
+
+      this.$refs.altitude_graph.addData(altitude_data);
     }
   }
 }

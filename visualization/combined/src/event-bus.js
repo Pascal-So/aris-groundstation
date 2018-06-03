@@ -13,7 +13,7 @@ Channels:
     'reset-views'
     'play'
     'pause'
-
+    'change-playback-time'
 */
 
 export const EventBus = new Vue();
