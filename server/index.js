@@ -120,24 +120,40 @@ function getDataRange(range_limits, start_time = null){
     return runQueries(influx, fields, start_time, end_time);
 }
 
-const influx = new Influx.InfluxDB({
-  host: 'localhost',
-  database: 'flight',
-  schema: [
-    {
-      measurement: 'pos',
-      fields: {
-        x: Influx.FieldType.Float
-      },
-      tags: []
-    }
-  ]
-});
+function connect(database){
+    influx = new Influx.InfluxDB({
+        host: 'influx', //'localhost',
+        database: database,
+        schema: [
+            {
+                measurement: 'pos',
+                fields: {
+                    x: Influx.FieldType.Float,
+                    y: Influx.FieldType.Float,
+                    z: Influx.FieldType.Float,
+                },
+                tags: []
+            },
+            {
+                measurement: 'rot',
+                fields: {
+                    x: Influx.FieldType.Float,
+                    y: Influx.FieldType.Float,
+                    z: Influx.FieldType.Float,
+                    w: Influx.FieldType.Float,
+                },
+                tags: []
+            },
+        ],
+    });
+}
+
+var influx = null;
 
 
 // ##################### Server config #####################
 const PORT = 8080;
-const HOST = '0.0.0.0';
+const HOST = 'data-provider'; //'0.0.0.0';
 
 const send_max_frames = 200;//10000;
 const use_cache = false;
@@ -212,6 +228,8 @@ function keepStateUpdated(){
         }
     ],
     info: {
+        requested_start: 0, // ms
+        flight_data_duration: 58000, // ms
     }
 }
 */
@@ -223,13 +241,23 @@ app.get('/get-data', (req, res) => {
 
     if(use_cache) keepStateUpdated();
 
+    const database = req.query.db;
+    if(!database || database == ''){
+        console.log(`Request with missing database selection.`);        
+        res.status(400);
+        res.send('No database selected.');
+        return;
+    }
+
+    connect(database);
+
     // inclusive start of requested time interval, given in ms since recording start
     var start_data_time = parseInt(req.query.start);
     if(isNaN(start_data_time)){
         start_data_time = null;
     }
 
-    console.log(`Received request for data form ${start_data_time}.`);
+    console.log(`Received request for data form ${start_data_time}, database '${database}'.`);
     /*
     commented out cache functionality to remove distraction for now
 
@@ -284,12 +312,20 @@ app.get('/get-data', (req, res) => {
             });
         }).catch(error => {
             console.log(error.message);
-            /*res.json({
-                error: error.message,
-            })*/
+            res.status(400);
+            res.send(error.message);
         });
 });
 
+app.get('/get-databases', (req, res) => {
+    influx.getDatabaseNames()
+        .then(databases => {
+            res.json({databases: databases});
+        })
+        .catch(error => {
+            console.log(error.message);
+        });
+});
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
