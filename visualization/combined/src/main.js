@@ -13,7 +13,7 @@ Vue.mixin({
   methods: {
     renderTime: time => {
       // time in ms
-      if(!time || isNaN(time)){
+      if(isNaN(time)){
         return 'T+??s';
       }
 

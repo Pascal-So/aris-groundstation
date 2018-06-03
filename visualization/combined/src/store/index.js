@@ -24,6 +24,18 @@ export default new Vuex.Store({
             end: end,
         };
     },
+    graphFormattedData: state => {
+        const altitude = state.data.map(frame => {
+            return {
+                x: frame.time / 1000,
+                y: frame.pos.z,
+            };
+        });
+
+        return {
+            altitude: altitude,
+        };
+    },
   },
   mutations: {
     merge (state, res) {

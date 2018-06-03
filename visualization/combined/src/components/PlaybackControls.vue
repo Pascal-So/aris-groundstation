@@ -93,7 +93,7 @@ export default {
       flight_duration: state => state.duration,
     }),
     ...mapGetters({
-      stored_data_range: 'storedDataRange' 
+      stored_data_range: 'storedDataRange',
     }),
   },
   mounted() {

@@ -32,7 +32,7 @@
       </div>
       <div class="panel area-c">
 
-        <Graph title="Altitude" ref="altitude_graph"></Graph>
+        <Graph title="Altitude" ref="altitude_graph" dataset="altitude"></Graph>
         <!-- <Graph title="Temperature"></Graph> -->
         <!-- <Graph title="Temperature"></Graph> -->
       </div>
@@ -73,13 +73,6 @@ export default {
       new_data.forEach(frame => {
         this.max_alt = Math.max(this.max_alt, frame.pos.z);
       });
-
-      const altitude_data = new_data.map(frame => {return {
-        x: frame.time / 1000,
-        y: frame.pos.z,
-      };});
-
-      this.$refs.altitude_graph.addData(altitude_data);
     }
   }
 }

@@ -143,7 +143,6 @@ function PlaybackController(){
         getNewData()
             .then(() => {
                 const range = store.getters.storedDataRange;
-                console.log("range:", range);
                 playback_time = range ? range.start : store.state.duration;
                 playing = true;
 

@@ -19,17 +19,17 @@ export default {
         {
           message: 'All Systems OK',
           severity: 6,
-          time: -1.35
+          time: -1000
         },
         {
           message: 'LAUNCH',
           severity: 5,
-          time: 0
+          time: 0.0,
         },
         {
           message: 'U fuekd up',
           severity: 5,
-          time: 12.89
+          time: 3500
         }
       ]
     }

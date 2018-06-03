@@ -9,6 +9,7 @@
 
 import Chart from 'chart.js';
 import moment from 'moment';
+import { mapState, mapGetters } from 'vuex';
 
 const tickColor = 'rgb(220, 220, 240)';
 const lineColor = 'rgb(110, 110, 110)';
@@ -16,7 +17,8 @@ const lineColor = 'rgb(110, 110, 110)';
 export default {
   name: 'Graph',
   props: [
-    'title'
+    'title',
+    'dataset',
   ],
   data () {
     return {
@@ -24,13 +26,18 @@ export default {
       chart: null,
     }
   },
-  methods: {
-    addData(data) {
-      if(data.length == 0) return;
-      console.log(`adding ${data.length} points to data`);
-      this.chart.data.datasets[0].data.push(...data);
+  computed: {
+    ...mapGetters({
+      graph_formatted_data: 'graphFormattedData',
+    }),
+  },
+  watch: {
+    graph_formatted_data: function(val){
+      if(!this.chart) return;
+
+      this.chart.data.datasets[0].data = val[this.dataset];
       this.chart.update();
-    }
+    },
   },
   mounted() {
     this.ctx = this.$el.querySelector('canvas').getContext('2d');
@@ -92,8 +99,6 @@ export default {
         }
       }
     });
-
-    //setInterval(this.addData, 100);
   }
 }
 </script>
