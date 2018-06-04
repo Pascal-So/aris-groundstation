@@ -32,8 +32,16 @@ export default new Vuex.Store({
             };
         });
 
+        const velocity_z = state.data.map(frame => {
+            return {
+                x: frame.time / 1000,
+                y: frame.vel.z,
+            };
+        });
+
         return {
             altitude: altitude,
+            velocity_z: velocity_z,
         };
     },
   },

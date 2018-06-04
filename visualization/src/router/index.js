@@ -5,12 +5,21 @@ import HelloWorld from '@/components/HelloWorld'
 
 Vue.use(Router)
 
+const User = {
+    props: ['id'],
+    template: '<div>User {{ id }}</div>',
+    mounted(){
+      console.log("mounted User component");
+    }
+} 
+
 export default new Router({
   routes: [
     {
-      path: '/',
+      path: '/flight/:database',
       name: 'Overview',
-      component: Overview
+      component: Overview,
+      props: true,
     },
     {
       path: '/info',

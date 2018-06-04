@@ -9,11 +9,10 @@
       {{ renderTime(playback_time) }}
     </h2>
     <div class="bar-outer" @click="clicked_bar" @mouseleave="leave_bar" @mousemove="hover_bar">
+      <div class="hover-box" v-if="hovering_bar" :style="{left: `calc(${hovering_percent} - 40px`}"><p>{{ renderTime(hover_time) }}</p></div>
       <div class="bar-inner" :style="{width: playback_progress_percent}"></div>
       <div class="bar-loaded-indicator" :style="{left: loaded_left_percent, right: loaded_right_percent}"></div>
     </div>
-
-    <p>Hover time: {{renderTime(hover_time)}}, Hovering: {{hovering_bar}}</p>
   </div>
 </template>
 
@@ -75,6 +74,13 @@ export default {
 
       return (fraction * 100).toString() + '%';
     },
+    hovering_percent() {
+      if(!this.flight_duration) return null;
+
+      const fraction = this.hover_time / this.flight_duration;
+
+      return (fraction * 100).toString() + '%';
+    },
     loaded_left_percent() {
       if(!this.stored_data_range) return '0';
 
@@ -107,6 +113,23 @@ export default {
 </script>
 
 <style scoped>
+.hover-box{
+  background-color: #5C5C5C;
+  border-radius: 2px;
+  width: 80px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  position: absolute;
+  top: -32px;
+  color: black;
+}
+
+.hover-box p{
+  margin: 0;
+  font-size: 0.8rem;
+}
+
 .playback-controls{
   text-align: center;
 }
@@ -126,7 +149,7 @@ export default {
   position: absolute;
   top: 6px;
   bottom: 0;
-  background-color: #2a6078;
+  background-color: #363535;
   z-index: 9;
 }
 
@@ -135,7 +158,7 @@ export default {
   bottom: 4px;
   left: 0;
   position: absolute;
-  background-color: #8C8C8C;
+  background-color: #3db7ed;
   z-index: 10;
 }
 

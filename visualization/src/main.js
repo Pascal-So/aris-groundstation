@@ -4,7 +4,6 @@ import Vue from 'vue';
 import store from './store'
 import App from './App';
 import router from './router';
-import PlaybackController from './playback-controller';
 
 Vue.config.productionTip = false;
 
@@ -36,5 +35,3 @@ new Vue({
   components: { App },
   template: '<App/>'
 });
-
-const controller = new PlaybackController();

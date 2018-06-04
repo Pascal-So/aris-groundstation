@@ -20,8 +20,10 @@ export default {
   mounted () {
     this.rocketviz = new RocketViz(this.$refs.visualization);
 
+    
     EventBus.$on('new-data', this.updateRocketViz);
     EventBus.$on('reset-views', this.rocketviz.reset);
+    EventBus.$on('change-playback-time', this.rocketviz.reset);
   },
   methods: {
     updateRocketViz (data) {

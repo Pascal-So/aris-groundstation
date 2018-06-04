@@ -7,8 +7,7 @@
 
 <script>
 
-import Chart from 'chart.js';
-import moment from 'moment';
+import Chart from 'chart.js/dist/Chart.js';
 import { mapState, mapGetters } from 'vuex';
 
 const tickColor = 'rgb(220, 220, 240)';

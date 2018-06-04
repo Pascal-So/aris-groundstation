@@ -39,9 +39,9 @@ services:
     ports:
       - 8080:8080
 
-  visualization:
-    build: ./visualization
-    depends_on:
-      - "data-provider"
-    ports:
-      - 8081:8080
+  # visualization:
+  #   build: ./visualization
+  #   depends_on:
+  #     - "data-provider"
+  #   ports:
+  #     - 8081:80

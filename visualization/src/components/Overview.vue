@@ -3,7 +3,7 @@
     <div class="flexrow">
       <div class="infoblock">
         <h2>Flight:</h2>
-        <h1>Mestral</h1>
+        <h1>{{ database }}</h1>
       </div>
       <div class="infoblock">
         <h2>Date:</h2>
@@ -24,17 +24,15 @@
 
     <div class="grid">
       <div class="panel">
-        <!-- <Visualization class="fill"/> -->
+        <Visualization class="fill"/>
       </div>
       <div class="panel">
         <h3>Events</h3>
         <Eventlist/>
       </div>
       <div class="panel area-c">
-
-        <Graph title="Altitude" ref="altitude_graph" dataset="altitude"></Graph>
-        <!-- <Graph title="Temperature"></Graph> -->
-        <!-- <Graph title="Temperature"></Graph> -->
+        <Graph title="Altitude" dataset="altitude"></Graph>
+        <Graph title="Vertical Velocity" dataset="velocity_z"></Graph>
       </div>
     </div>
 
@@ -47,26 +45,33 @@
 
 import Graph from './Graph.vue';
 import Eventlist from './Eventlist.vue';
-// import Visualization from './Visualization.vue';
+import Visualization from './Visualization.vue';
 import { EventBus } from '../event-bus.js';
 import PlaybackControls from './PlaybackControls.vue';
+import PlaybackController from '../playback-controller';
 
 export default {
   components: {
     'Graph': Graph,
     'Eventlist': Eventlist,
-    // 'Visualization': Visualization,
+    'Visualization': Visualization,
     'PlaybackControls': PlaybackControls,
   },
   name: 'Overview',
+  props: ['database'],
   data () {
     return {
       max_alt: 0,
     }
   },
   mounted () {
+    const controller = new PlaybackController(this.database);
+
     EventBus.$on('new-data', this.newData);
     EventBus.$on('reset-views', () => {this.max_alt = 0;});
+  },
+  beforeDestroy () {
+    EventBus.$emit('pause');
   },
   methods: {
     newData(new_data){

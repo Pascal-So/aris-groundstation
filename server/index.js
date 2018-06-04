@@ -9,7 +9,7 @@ const DATA_FRAME_INTERVAL = 50 // ms;
 // construct InfluxDB query string
 function selectString(fields, measurement, start_time, end_time){
     const str = `SELECT ${fields.map(name => `first(${name}) as ${name}`).join(', ')} FROM ${measurement} `
-        + `WHERE time >= ${start_time} and time < ${end_time} GROUP BY time(${DATA_FRAME_INTERVAL}ms) fill(previous) limit 9990`;
+        + `WHERE time >= ${start_time} and time < ${end_time} GROUP BY time(${DATA_FRAME_INTERVAL}ms) fill(previous) limit ${send_max_frames}`;
     return str;
 }
 
@@ -114,24 +114,27 @@ function getDataRange(range_limits, start_time = null){
 
     const fields = {
         'pos': ['x', 'y', 'z'],
-        'rot': ['x', 'y', 'z', 'w']
+        'rot': ['x', 'y', 'z', 'w'],
+        'vel': ['x', 'y', 'z'],
     };
 
     return runQueries(influx, fields, start_time, end_time);
 }
 
 function connect(database){
+    const xyz = {
+        x: Influx.FieldType.Float,
+        y: Influx.FieldType.Float,
+        z: Influx.FieldType.Float,
+    };
+
     influx = new Influx.InfluxDB({
-        host: 'influx', //'localhost',
+        host: containerized ? 'influx' : 'localhost',
         database: database,
         schema: [
             {
                 measurement: 'pos',
-                fields: {
-                    x: Influx.FieldType.Float,
-                    y: Influx.FieldType.Float,
-                    z: Influx.FieldType.Float,
-                },
+                fields: xyz,
                 tags: []
             },
             {
@@ -144,6 +147,11 @@ function connect(database){
                 },
                 tags: []
             },
+            {
+                measurement: 'vel',
+                fields: xyz,
+                tags: []
+            },
         ],
     });
 }
@@ -153,7 +161,8 @@ var influx = null;
 
 // ##################### Server config #####################
 const PORT = 8080;
-const HOST = 'data-provider'; //'0.0.0.0';
+const containerized = true;
+const HOST = containerized ? 'data-provider' : '0.0.0.0';
 
 const send_max_frames = 200;//10000;
 const use_cache = false;
@@ -186,7 +195,11 @@ function cachedDataRange(){
 }
 
 /*
-uncomment when cache is activated
+uncomment when cache is activated. Now that not every request goes to the same database, we'll have to add a
+database distinction. Maybe even figure out a way to detect the actively growing database.
+
+Ideally we'd just scrap the cache if influxdb (and the server this is gonna be running on) can handle the
+expected amount of requests.
 
 function keepStateUpdated(){
     let current_server_time = Date.now(); // server time in ms timestamp

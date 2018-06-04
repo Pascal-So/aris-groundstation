@@ -2,7 +2,7 @@ import { EventBus } from './event-bus';
 import Config from './config';
 import store from './store'
 
-function PlaybackController(){
+function PlaybackController(database){
     var playing;
     var last_requested_data_time;
     var playback_time; // in milliseconds data time
@@ -55,7 +55,7 @@ function PlaybackController(){
             return;
         }
         last_requested_data_time = start_time;
-        const url = Config.fetch_url + `/get-data?start=${start_time}`;
+        const url = Config.fetch_url + `/get-data?start=${start_time}&db=${database}`;
 
         console.log(`Fetching from '${url}'`);
 
