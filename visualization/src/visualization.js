@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import OrbitControls from './OrbitControls.js'; //'orbit-controls-es6'
+import OrbitControls from './OrbitControls.js';
 import RocketPartModels from './models/rocket-part-models.js';
 const Stats = require('./stats.js');
 
@@ -28,9 +28,6 @@ function RocketViz(element){
   const rocketOffset = new THREE.Vector3(0,0.9,0);
   const cameraOffset = new THREE.Vector3(1,2,4);
 
-  // only used for now, will be removed later
-  // var i = 0;
-  // const rotdata = Flightdata;
 
   /////////// public methods
 
@@ -66,13 +63,15 @@ function RocketViz(element){
 
     const latest = points[points.length - 1];
 
-    var quat = new THREE.Quaternion(latest.rot.x, latest.rot.y, latest.rot.z, latest.rot.w);
+    var quat = new THREE.Quaternion(latest.rot.x, latest.rot.z, -latest.rot.y, latest.rot.w);
     if(firstquat === -1){
       firstquat = quat.clone();
       firstquat.inverse();
     }
-    quat.multiply(new THREE.Quaternion(0, 0, -0.7071, 0.7071));
-    quat.premultiply(new THREE.Quaternion(-0.7071, 0, 0, 0.7071));
+    quat.multiply(firstquat);
+    //quat.multiply(new THREE.Quaternion(0, 0, -0.7071, 0.7071));
+    //quat.premultiply(new THREE.Quaternion(0, 1, 0, 0));
+    //quat.multiply(new THREE.Quaternion(0.7071, 0, 0, 0.7071));
     rocket.quaternion.set(quat.x, quat.y, quat.z, quat.w);
 
     rocket.position.set(latest.pos.x, latest.pos.y, latest.pos.z);
@@ -147,10 +146,18 @@ function RocketViz(element){
 
     scene = new THREE.Scene();
 
+    /*
+    happy little debug cube
+    var cube = new THREE.Mesh(new THREE.BoxBufferGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial());
+    cube.position.set(5, 0, 0);
+    scene.add(cube);
+    */
+
     // add rocket
     rocket = new THREE.Group();
     loadModels(rocket);
     rocket.scale.multiplyScalar(0.1);
+    //rocket.scale.set(0.3,0.1,0.1);
     scene.add(rocket);
 
     // add light

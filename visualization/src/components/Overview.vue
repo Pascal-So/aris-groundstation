@@ -49,6 +49,7 @@ import Visualization from './Visualization.vue';
 import { EventBus } from '../event-bus.js';
 import PlaybackControls from './PlaybackControls.vue';
 import PlaybackController from '../playback-controller';
+import store from '../store'
 
 export default {
   components: {
@@ -62,16 +63,21 @@ export default {
   data () {
     return {
       max_alt: 0,
+      controller: null,
     }
   },
   mounted () {
-    const controller = new PlaybackController(this.database);
+    this.controller = new PlaybackController(this.database);
 
     EventBus.$on('new-data', this.newData);
     EventBus.$on('reset-views', () => {this.max_alt = 0;});
   },
   beforeDestroy () {
+    store.commit('clear');
     EventBus.$emit('pause');
+    this.controller.destroy();
+    this.controller = null;
+    console.log("destroying Overview Component");
   },
   methods: {
     newData(new_data){
@@ -148,6 +154,5 @@ export default {
   .panel{
     min-height: 600px;
   }
-
 }
 </style>

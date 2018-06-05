@@ -7,11 +7,18 @@ function PlaybackController(database){
     var last_requested_data_time;
     var playback_time; // in milliseconds data time
 
-    const playback_speed = 1;
+    const playback_speed = 0.5;
 
     var viewLoop_timeout_object; // storing the timeout that then calls the next viewLoop iteration
 
     const view_update_interval = Config.data_frame_interval * Config.data_frames_per_view_update;
+
+    this.destroy = () => {
+        destroyListeners();
+        window.clearTimeout(viewLoop_timeout_object);
+        playing = false;
+        playback_time = null;
+    }
 
     const viewLoop = () => {
         // stop other loop instances that might be running. This allows us to just call viewLoop() at
@@ -67,6 +74,7 @@ function PlaybackController(database){
                     return [];
                 }else{
                     //mergeData(res)
+                    console.log(`Received data, requested starttime is ${start_time}.`);
                     store.commit('merge', res);
                 }
             })
@@ -76,32 +84,45 @@ function PlaybackController(database){
             });
     }
 
-    const setupListeners = () => {
-        EventBus.$on('change-playback-time', (new_time) => {
-            if(store.state.duration){
-                if(new_time < 0 || new_time > store.state.duration){
-                    console.log("Tried to jump outside server available flight data. Correcting to nearest available.");
-                    
-                    if(new_time > store.state.duration){
-                        new_time = store.state.duration;
-                    }else{
-                        new_time = 0;
-                    }
+    const pauseEventHandler = () => {
+        console.log("paused");
+        window.clearTimeout(viewLoop_timeout_object);
+        playing = false;
+    }
+
+    const playEventHandler = () => {
+        console.log("playing");
+        playing = true;
+        viewLoop();
+    }
+
+    const skipEventHandler = (new_time) => {
+        if(store.state.duration){
+            if(new_time < 0 || new_time > store.state.duration){
+                console.log("Tried to jump outside server available flight data. Correcting to nearest available.");
+                
+                if(new_time > store.state.duration){
+                    new_time = store.state.duration;
+                }else{
+                    new_time = 0;
                 }
             }
+        }
 
-            playback_time = new_time;
-            viewLoop(); // don't wait for next loop iteration
-        });
+        playback_time = new_time;
+        viewLoop(); // don't wait for next loop iteration
+    }
 
-        EventBus.$on('pause', () => {
-            playing = false;
-        });
+    const setupListeners = () => {
+        EventBus.$on('change-playback-time', skipEventHandler);
+        EventBus.$on('pause', pauseEventHandler);
+        EventBus.$on('play', playEventHandler);
+    }
 
-        EventBus.$on('play', () => {
-            playing = true;
-            viewLoop();
-        });
+    const destroyListeners = () => {
+        EventBus.$off('change-playback-time', skipEventHandler);
+        EventBus.$off('pause', pauseEventHandler);
+        EventBus.$off('play', playEventHandler);
     }
 
     /*const mergeData = res => {

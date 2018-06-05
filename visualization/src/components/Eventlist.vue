@@ -25,11 +25,6 @@ export default {
           message: 'LAUNCH',
           severity: 5,
           time: 0.0,
-        },
-        {
-          message: 'U fuekd up',
-          severity: 5,
-          time: 3500
         }
       ]
     }

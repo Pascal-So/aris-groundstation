@@ -7,7 +7,7 @@
 
       <br><br>
 
-      <router-link :to="{name: 'Overview', params: {database: 'mestral1'}}" class="menu-entry" exact-active-class="menu-entry-active">Overview</router-link>
+      <router-link :to="{name: 'FlightSelection'}" class="menu-entry" exact-active-class="menu-entry-active">Select Flight</router-link>
       <router-link :to="{name: 'Info'}" class="menu-entry" exact-active-class="menu-entry-active">Info</router-link>
 
       <br><br><br>
