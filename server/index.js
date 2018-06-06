@@ -331,6 +331,7 @@ app.get('/get-data', (req, res) => {
 });
 
 app.get('/get-databases', (req, res) => {
+    connect('dummy');
     influx.getDatabaseNames()
         .then(databases => {
             res.json({databases: databases});

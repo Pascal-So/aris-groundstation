@@ -7,6 +7,12 @@
 </head>
 <body>
 <h1>RF Interface Controls</h1>
-<p><a href="{{ url_for('send_command') }}">Send Command</a></p>
+<!-- <p><a href="{{ url_for('send_command') }}">Send Command</a></p>
+ -->
+<form method="POST" action="{{ url_for('send_command') }}">
+    <label>Command: </label><input type="text" name="command"> <br><br>
+    <input type="submit" value="Send Command">
+</form>
+
 </body>
 </html>

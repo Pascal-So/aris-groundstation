@@ -7,7 +7,7 @@ function PlaybackController(database){
     var last_requested_data_time;
     var playback_time; // in milliseconds data time
 
-    const playback_speed = 0.5;
+    const playback_speed = 1.0;
 
     var viewLoop_timeout_object; // storing the timeout that then calls the next viewLoop iteration
 

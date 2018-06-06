@@ -108,6 +108,9 @@ export default {
 
       this.playback_time = data[data.length - 1].time;
     });
+    EventBus.$on('change-playback-time', time => {
+      this.playback_time = time;
+    });
   }
 }
 </script>

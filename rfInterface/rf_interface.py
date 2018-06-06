@@ -27,19 +27,25 @@ def parseMessage(bytestream):
     ]
 
 def data_receive_callback(xbee_message):
+    sender = xbee_message.remote_device.get_64bit_addr()
+    if not sender in ['asdf', '315']:
+        print("Unknown sender", sender, flush=True)
+        return
     bytestream = xbee_message.data
     data = parseMessage(bytestream)
     ifdb_client.write_points(data)
     print("Received:", data, flush=True)
 
 def send_command_callback(command = None):
-    print("send_command called", flush=True)
-    #xbee_send("Send Command Test")
+    if command == None or command == "":
+        command = "None"
+    print("########## send_command called. Command = '" + command + "'", flush=True)
+    #xbee_send(command)
 
 def main():
     try:
-        #database_name = datetime.now().strftime("flight-%Y-%m-%d-%H-%M-%S")
-        #ifdb_client = InfluxDBClient('influx', 8086, 'root', 'root', database_name)
+        database_name = datetime.now().strftime("flight-%Y-%m-%d-%H-%M-%S")
+        ifdb_client = InfluxDBClient('influx', 8086, 'root', 'root', database_name)
         #ifdb_client.create_database(database_name)
         run_control_server(send_command_callback)
         while True:

@@ -11,14 +11,14 @@ def run_control_server(send_command_callback):
     def index():
         return render_template("index.html")
 
-    @app.route('/send-command')
+    @app.route('/send-command', methods=['POST'])
     def send_command():
-        # command = request.args.get('command')
-        # if command == None or command == "":
-        #     code = 400
-        #     message = "command missing"
-        #     return message, code
-        command = ""
+        command = request.form['command']
+        if command == None:
+            code = 400
+            message = "command missing"
+            return message, code
+        
         send_command_callback(command)
         return redirect(url_for('index'))
 

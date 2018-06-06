@@ -9,16 +9,16 @@ services:
     ports:
       - 8086:8086
 
-  # receiver:
-  #   build: ./rfInterface/
-  #   #devices:
-  #   #  - "/dev/ttyUSB1:/USB"
-  #   depends_on:
-  #     - "influx"
-  #   ports:
-  #     - 5000:5000
+  receiver: # python script communicating with xbee
+    build: ./rfInterface/
+    #devices:
+    #  - "/dev/ttyUSB1:/USB"
+    depends_on:
+      - "influx"
+    ports:
+      - 5000:5000
 
-  # grafana:
+  # grafana: # if u need raw data access
   #   image: grafana/grafana
   #   ports:
   #     - 3000:3000
@@ -27,19 +27,12 @@ services:
   #   depends_on:
   #     - "influx"
 
-  #apache:
-  #  image: httpd:2.4
-  #  environment:
-  #    - VIRTUAL_HOST=visualization.codelis.local
-  #  volumes:
-  #    - ./visualization:/usr/local/apache2/htdocs/
-
-  data-provider:
+  data-provider: # node server that gets data from influxdb and sends to browser
     build: ./server
     ports:
       - 8080:8080
 
-  # visualization:
+  # visualization: # apache server that servers visualization webapp to client
   #   build: ./visualization
   #   depends_on:
   #     - "data-provider"
