@@ -74,10 +74,9 @@ def main():
         ifdb_client = InfluxDBClient('influx', 8086, 'root', 'root', database_name)
         ifdb_client.create_database(database_name)
         run_control_server(send_command_callback)
+        xbee_listen(data_receive_callback)
         while True:
             time.sleep(1)
-
-        xbee_listen(data_receive_callback)
 
     finally:
         xbee_close()

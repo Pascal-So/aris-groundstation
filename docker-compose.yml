@@ -11,8 +11,8 @@ services:
 
   receiver: # python script communicating with xbee
     build: ./rfInterface/
-    #devices:  # Change the devce to the usb port where the xbee module is connected
-    #  - "/dev/ttyUSB1:/USB"
+    devices:  # Change the devce to the usb port where the xbee module is connected
+     - "/dev/ttyUSB1:/USB"
     depends_on:
       - "influx"
     ports:

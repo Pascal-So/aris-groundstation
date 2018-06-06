@@ -31,8 +31,10 @@ def xbee_listen(callback): # call this before xbee_send
 
 # https://github.com/digidotcom/python-xbee/tree/master/examples/communication
 def xbee_send(data):
+    global rf_device
     rf_device.send_data_broadcast(data)
 
 def xbee_close():
+    global rf_device
     if rf_device is not None and rf_device.is_open():
         rf_device.close()
