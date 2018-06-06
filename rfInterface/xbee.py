@@ -15,8 +15,8 @@
 from digi.xbee.devices import XBeeDevice
 
 # The device "/USB" is connected to /dev/ttyUSBx in docker compose file.
-#PORT = "/USB"
-PORT = "/dev/ttyUSB0"
+PORT = "/USB"
+#PORT = "/dev/ttyUSB0"
 
 BAUD_RATE = 9600
 
