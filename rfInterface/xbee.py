@@ -20,21 +20,26 @@ PORT = "/USB"
 
 BAUD_RATE = 9600
 
-
 rf_device = None
 
-def xbee_listen(callback): # call this before xbee_send
+
+def xbee_connect():
     global rf_device
+    print("setting up connection to xbee device", flush=True)
     rf_device = XBeeDevice(PORT, BAUD_RATE)
     rf_device.open()
+
+def xbee_listen(callback): # call this before xbee_send
+    if rf_device is None or not rf_device.is_open():
+        xbee_connect()
     rf_device.add_data_received_callback(callback)
 
 # https://github.com/digidotcom/python-xbee/tree/master/examples/communication
 def xbee_send(data):
-    global rf_device
+    if rf_device is None or not rf_device.is_open():
+        xbee_connect()
     rf_device.send_data_broadcast(data)
 
 def xbee_close():
-    global rf_device
     if rf_device is not None and rf_device.is_open():
         rf_device.close()
