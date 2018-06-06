@@ -15,27 +15,28 @@
 from digi.xbee.devices import XBeeDevice
 
 # The device "/USB" is connected to /dev/ttyUSBx in docker compose file.
-PORT = "/USB"
-# PORT = "/dev/ttyUSB2"
+#PORT = "/USB"
+PORT = "/dev/ttyUSB0"
 
 BAUD_RATE = 9600
 
 rf_device = None
-
 
 def xbee_connect():
     global rf_device
     print("setting up connection to xbee device", flush=True)
     rf_device = XBeeDevice(PORT, BAUD_RATE)
     rf_device.open()
-
-def xbee_listen(callback): # call this before xbee_send
+    
+def xbee_listen(callback):
+    print("xbee_listen called", flush=True)
     if rf_device is None or not rf_device.is_open():
         xbee_connect()
     rf_device.add_data_received_callback(callback)
 
 # https://github.com/digidotcom/python-xbee/tree/master/examples/communication
 def xbee_send(data):
+    print("xbee_send called", flush=True)
     if rf_device is None or not rf_device.is_open():
         xbee_connect()
     rf_device.send_data_broadcast(data)

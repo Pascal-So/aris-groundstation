@@ -73,8 +73,10 @@ def main():
         database_name = datetime.now().strftime("flight-%Y-%m-%d-%H-%M-%S")
         ifdb_client = InfluxDBClient('influx', 8086, 'root', 'root', database_name)
         ifdb_client.create_database(database_name)
+
         xbee_listen(data_receive_callback)
         run_control_server(send_command_callback)
+        
         while True:
             time.sleep(1)
 
