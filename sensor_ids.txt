@@ -1,0 +1,16 @@
+# This is used in rfInterface/rf_interface.py to decode the messages from the rocket.
+
+Event           0
+Accelerometer   1
+Gyroscope       2
+Barometer1      3
+Barometer2      4
+Magnetometer    5
+Climate         6
+GPS1            7
+GPS2            8
+Batteries       9
+
+Position        101
+Rotation        102
+Velocity        103

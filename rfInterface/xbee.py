@@ -23,7 +23,7 @@ BAUD_RATE = 9600
 
 rf_device = None
 
-def xbee_listen(callback):
+def xbee_listen(callback): # call this before xbee_send
     global rf_device
     rf_device = XBeeDevice(PORT, BAUD_RATE)
     rf_device.open()

@@ -11,14 +11,14 @@ services:
 
   receiver: # python script communicating with xbee
     build: ./rfInterface/
-    #devices:
+    #devices:  # Change the devce to the usb port where the xbee module is connected
     #  - "/dev/ttyUSB1:/USB"
     depends_on:
       - "influx"
     ports:
       - 5000:5000
 
-  # grafana: # if u need raw data access
+  # grafana: # uncomment this if u need raw data access
   #   image: grafana/grafana
   #   ports:
   #     - 3000:3000
@@ -32,9 +32,12 @@ services:
     ports:
       - 8080:8080
 
-  # visualization: # apache server that servers visualization webapp to client
-  #   build: ./visualization
-  #   depends_on:
-  #     - "data-provider"
-  #   ports:
-  #     - 8081:80
+  visualization: # apache server that servers visualization webapp to client
+                 # Note: this container takes a long time to build, so if you
+                 # don't have time for that, run `npm run dev` instead in the
+                 # `visualization` directory AFTER running `docker-compose up`.
+    build: ./visualization
+    depends_on:
+      - "data-provider"
+    ports:
+      - 8081:80
