@@ -42,15 +42,14 @@ def parseMessage(bytestream):
 
     measurement = sensor_id_table[sensor_id]
 
-    return [
-        {
-            "measurement": measurement,
-            "time": timestamp_ms, # TODO what do we need here? string/int ms/ns??
-            "fields": {
-                "value": 0.64
-            }
+    return {
+        "measurement": measurement,
+        "time": timestamp_ms, # TODO what do we need here? string/int ms/ns??
+        "fields": {
+            "value": 0.64
         }
-    ]
+    }
+
 
 def data_receive_callback(xbee_message):
     sender = xbee_message.remote_device.get_64bit_addr()
