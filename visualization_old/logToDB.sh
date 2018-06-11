@@ -2,8 +2,8 @@ set -u
 set -e
 set -o xtrace
 
-if [[ $# -ne 2 ]]; then
-    echo "Usage: $0 data.log database"
+if [[ $# -ne 3 ]]; then
+    echo "Usage: $0 data.log database host"
     exit 1
 fi
 
@@ -20,8 +20,10 @@ tmpfile="/tmp/flightdata_$$"
 head $tmpfile
 
 database=$2
-curl -i -XPOST "http://localhost:8086/query" --data-urlencode "q=CREATE DATABASE ${database}"
+host=$3
 
-curl -i -XPOST "http://localhost:8086/write?db=${database}" --data-binary @"${tmpfile}"
+curl -i -XPOST "http://${host}:8086/query" --data-urlencode "q=CREATE DATABASE ${database}"
+
+curl -i -XPOST "http://${host}:8086/write?db=${database}" --data-binary @"${tmpfile}"
 
 rm $tmpfile

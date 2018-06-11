@@ -1,5 +1,6 @@
 <template>
   <div class="eventlist">
+    <h3>Events</h3>
     <ul>
       <li v-for="event in events" class="event">
         <p>{{ renderTime(event.time) }}</p>
@@ -17,14 +18,9 @@ export default {
     return {
       events: [
         {
-          message: 'All Systems OK',
-          severity: 6,
-          time: -1000
-        },
-        {
-          message: 'LAUNCH',
+          message: 'Example event: State transition',
           severity: 5,
-          time: 0.0,
+          time: 1.2,
         }
       ]
     }
@@ -38,6 +34,15 @@ export default {
     margin: 0;
     padding: 0;
   }
+
+  h3{
+    padding: 0 5px;
+  }
+
+  .eventlist{
+    padding: 0 10px;
+  }
+
   .event{
     background-color: #1D1C1F;
     margin: 10px 0;

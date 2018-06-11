@@ -5,17 +5,14 @@
           <img src="./assets/arislogo.png" width="140">
       </header>
 
-      <br><br>
-
-      <router-link :to="{name: 'FlightSelection'}" class="menu-entry" exact-active-class="menu-entry-active">Select Flight</router-link>
-
-      <br><br><br>
-      <a href="http://localhost:5000" class="menu-entry">RF Interface</a>
-      <a href="https://aris-space.ch" class="menu-entry">ARIS homepage</a>
+      <br>
+      <a href="http://localhost:5000" class="menu-entry">RF&nbsp;Interface</a>
+      <a href="https://aris-space.ch" class="menu-entry">ARIS&nbsp;homepage</a>
+      <br>
+      <br>
     </div>
     <div class="main">
       <router-view/>
-      
     </div>
   </div>
 </template>
@@ -43,23 +40,22 @@ header{
   -moz-osx-font-smoothing: grayscale;
   text-align: left;
   color: #ddd;
-  margin-top: 60px;
+  /*margin-top: 60px;*/
 }
 
 .sidebar{
   background-color: #100F11;
-  position: absolute;
+  text-align: center;
+  /*position: absolute;
   top: 0;
   left: 0;
-  bottom: 0;
-  width: 180px;
+  bottom: 0;*/
+  /*width: 180px;*/
 }
 
 .menu-entry{
-    display: inline-block;
-    width: 100%;
-    padding: 10px;
-    padding-left: 15px;
+    display: inline;
+    padding: 5px 15px;
     text-decoration: none;
     color: #dedede;
 }
@@ -73,10 +69,6 @@ header{
 }
 
 .main{
-  position: absolute;
-  top: 0;
-  left: 200px;
-  right: 20px;
-  bottom: 0;
+  padding: 10px;
 }
 </style>

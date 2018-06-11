@@ -2,35 +2,30 @@
   <div id="overview">
     <div class="flexrow">
       <div class="infoblock">
-        <h2>Flight:</h2>
-        <h1>{{ database }}</h1>
+        <h3>Flight:</h3>
+        <h2>{{ database }}</h2><br>
+        <router-link :to="{name: 'FlightSelection'}" exact-active-class="menu-entry-active">Other Flights</router-link>
       </div>
       <div class="infoblock">
-        <h2>Date:</h2>
-        <h1>2017-11-14</h1>
+        <h3>Max Alt:</h3>
+        <h2>{{ max_alt.toFixed(2) }}m</h2>
       </div>
-      <div class="infoblock">
-        <h2>Max Alt:</h2>
-        <h1>{{ max_alt.toFixed(2) }}m</h1>
-      </div>
+    </div>
+
+    <div class="playback-fixed">
+      <PlaybackControls/>
     </div>
 
     <br>
 
-    <PlaybackControls/>
-
-    <br>
-    <br>
-
     <div class="grid">
-      <div class="panel">
+      <div class="panel area-viz">
         <Visualization class="fill"/>
       </div>
-      <div class="panel">
-        <h3>Events</h3>
+      <div class="panel area-event">
         <Eventlist/>
       </div>
-      <div class="panel area-c">
+      <div class="panel area-graph">
         <Graph title="Altitude" dataset="altitude"></Graph>
         <Graph title="Vertical Velocity" dataset="velocity_z"></Graph>
       </div>
@@ -90,8 +85,23 @@ export default {
 </script>
 
 <style scoped>
+
+h1{
+  margin: 5px 0;
+}
+
+a{
+  color: #868686;
+  text-decoration-style: dotted;
+}
+
+a:visited{
+  color: #868686;
+}
+
 #overview{
   color: #CECECE;
+  padding-bottom: 70px;
 }
 
 .grid{
@@ -110,7 +120,8 @@ export default {
 .panel{
   border: 3px solid #5C5C5C;
   box-sizing: border-box;
-  padding: 0 10px;
+  padding: 0;
+  margin-bottom: 5px;
   border-radius: 3px;
   position: relative;
   box-shadow: 4px 4px rgba(0,0,0,0.3);
@@ -125,34 +136,109 @@ export default {
 }
 
 .infoblock{
-  color: #868686;
+  color: #bcbcbc;
   padding-right: 20px;
-
+  margin-bottom: 10px;
+}
+.infoblock h3{
+  margin-bottom: 0px;
+  font-size: 15px;
+  display: inline-block;
 }
 .infoblock h2{
-  margin-bottom: 0px;
-}
-.infoblock h1{
-  font-size: 45px;
+  font-size: 35px;
   font-weight: 300;
-  margin-top: 0px;
+  margin: 0 0 5px;
+  display: inline-block;
+}
+
+.playback-fixed{
+    position: static;
+    border: none;
+    margin-top: 10px;
 }
 
 
 @media(max-width: 1000px){
+  .playback-fixed{
+    position: fixed;
+    background-color: #151417;
+    padding: 0 10px 20px;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 100;
+    border-top: 3px solid #0c0c0c;
+  }
+
   .grid{
-    grid-template-columns: 1fr 0.5fr;
+    grid-template-columns: 1fr 0.6fr;
     grid-template-areas: 
         "a b"
         "c c";
   }
 
-  .area-c{
+  .area-graph{
     grid-area: c;
+  }
+
+  .area-event{
+    grid-area: b; 
+  }
+
+  .area-viz{
+    grid-area: a; 
   }
 
   .panel{
     min-height: 600px;
+  }
+
+  .infoblock h3{
+    font-size: 14px;
+  }
+  .infoblock h2{
+    font-size: 25px;
+  }
+}
+
+@media(max-width: 700px){
+  .grid{
+    grid-template-columns: 1fr;
+    grid-template-areas: 
+        "a"
+        "b"
+        "c";
+  }
+
+  .area-graph{
+    grid-area: a;
+  }
+
+  .area-event{
+    grid-area: b; 
+  }
+
+  .area-viz{
+    grid-area: c; 
+  }
+
+  .panel{
+    min-height: 500px;
+  }
+}
+
+@media(max-width: 530px){
+  .flexrow{
+    flex-direction: column;
+  }
+
+  .infoblock h2{
+    font-size: 20px;
+  }
+
+  .panel{
+    min-height: 400px;
   }
 }
 </style>

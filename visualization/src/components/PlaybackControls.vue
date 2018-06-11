@@ -128,6 +128,10 @@ export default {
   color: black;
 }
 
+h2{
+  margin: 7px 0;
+}
+
 .hover-box p{
   margin: 0;
   font-size: 0.8rem;
@@ -167,5 +171,11 @@ export default {
 
 .play-button:hover{
   cursor: pointer;
+}
+
+@media(max-width: 450px){
+  h2{
+    font-size: 18px;
+  }
 }
 </style>

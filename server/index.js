@@ -159,7 +159,7 @@ var influx = null;
 
 // ##################### Server config #####################
 const PORT = 8080;
-const containerized = false;
+const containerized = true;
 const HOST = containerized ? 'data-provider' : '0.0.0.0';
 
 const send_max_frames = 200;//10000;
@@ -328,11 +328,10 @@ app.get('/get-data', (req, res) => {
 });
 
 app.get('/get-databases', (req, res) => {
-    console.log("process: ", process.env);
     connect('dummy');
     influx.getDatabaseNames()
         .then(databases => {
-            res.json({databases: databases});
+            res.json({databases: databases.filter(db => db != '_internal')});
         })
         .catch(error => {
             console.log('Error:', error.message);

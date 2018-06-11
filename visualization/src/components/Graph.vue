@@ -106,4 +106,12 @@ export default {
   h1{
     color: #ddd;
   }
+
+  h3{
+    padding: 0 10px;
+  }
+
+  .graph{
+    padding: 0 5px;
+  }
 </style>
