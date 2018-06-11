@@ -1,8 +1,8 @@
-from influxdb import InfluxDBClient
 import struct
 import time
 from datetime import datetime
 
+from ifdb import ifdb_connect, ifdb_write
 from xbee import xbee_listen, xbee_send, xbee_close
 from control_server.control_server import run_control_server
 
@@ -59,7 +59,7 @@ def data_receive_callback(xbee_message):
         return
     bytestream = xbee_message.data
     data = parseMessage(bytestream)
-    ifdb_client.write_points(data)
+    ifdb_write(data)
     print("Received:", data, flush=True)
 
 def send_command_callback(command = None):
@@ -71,9 +71,7 @@ def send_command_callback(command = None):
 def main():
     try:
         database_name = datetime.now().strftime("flight-%Y-%m-%d-%H-%M-%S")
-        ifdb_client = InfluxDBClient('influx', 8086, 'root', 'root', database_name)
-        ifdb_client.create_database(database_name)
-
+        ifdb_connect(database_name)
         xbee_listen(data_receive_callback)
         run_control_server(send_command_callback)
         

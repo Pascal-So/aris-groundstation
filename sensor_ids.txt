@@ -1,16 +1,24 @@
 # This is used in rfInterface/rf_interface.py to decode the messages from the rocket.
 
-Event           0
-Accelerometer   1
-Gyroscope       2
-Barometer1      3
-Barometer2      4
-Magnetometer    5
-Climate         6
-GPS1            7
-GPS2            8
-Batteries       9
+Sensor          id      abbrev.      data format (up to 128 bits)
 
-Position        101
-Rotation        102
-Velocity        103
+Event           0       'event'      uint32   uint32
+Accelerometer   1       'acc'        ?
+Gyroscope       2       'gyro'       ?
+Barometer1      3       'bar1'       ?
+Barometer2      4       'bar2'       ?
+Magnetometer    5       'mag'        ?
+Climate         6       'cli'        ?
+GPS1            7       'gps1'       ?
+GPS2            8       'gps2'       ?
+Batteries       9       'bat'        ?
+                                     
+Position        101     'pos'        float32  float32  float32
+Rotation        102     'rot'        float32  float32  float32  float32
+Velocity        103     'vel'        float32  float32  float32
+
+
+
+messages will be sent from the rocket to the groundstation in this format:
+timestamp (uint32),  sensor_id (uint8),  data (up to 128 bits)
+= up to 168 bits per message

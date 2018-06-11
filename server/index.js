@@ -21,7 +21,7 @@ function selectString(fields, measurement, start_time, end_time){
 function runQueries(influx, fields, start_time, end_time){
     const promises = Object.keys(fields).map(key => {
         const query = selectString(fields[key], key, milliToNano(start_time), milliToNano(end_time));
-        console.log("query:", query);
+        console.log("Running query:", query);
         return influx.query(query)
             .then(data => {
                 return {'key': key, 'values': data};
@@ -110,8 +110,6 @@ function getDataRange(range_limits, start_time = null){
     }
     const end_time = range_limits.end;
 
-    console.log(`Query start time: ${start_time}, end time: ${end_time}.`);
-
     const fields = {
         'pos': ['x', 'y', 'z'],
         'rot': ['x', 'y', 'z', 'w'],
@@ -161,7 +159,7 @@ var influx = null;
 
 // ##################### Server config #####################
 const PORT = 8080;
-const containerized = true;
+const containerized = false;
 const HOST = containerized ? 'data-provider' : '0.0.0.0';
 
 const send_max_frames = 200;//10000;
@@ -270,7 +268,7 @@ app.get('/get-data', (req, res) => {
         start_data_time = null;
     }
 
-    console.log(`Received request for data form ${start_data_time}, database '${database}'.`);
+    console.log(`Received request for data form '${start_data_time}', database '${database}'.`);
     /*
     commented out cache functionality to remove distraction for now
 
@@ -307,7 +305,6 @@ app.get('/get-data', (req, res) => {
     getRangeLimits()
         .then(limits => {
             range_limits = limits;
-            console.log(limits);
             return getDataRange(range_limits, start_data_time + range_limits.start);
         })
         .then(response_data => {
@@ -315,7 +312,7 @@ app.get('/get-data', (req, res) => {
                 frame.time -= range_limits.start;
                 return frame;
             });
-            console.log(`Sending ${send_data.length} back`);
+            console.log(`Sending ${send_data.length} frames of data`);
             res.json({
                 data: send_data,
                 info: {
@@ -324,20 +321,21 @@ app.get('/get-data', (req, res) => {
                 },
             });
         }).catch(error => {
-            console.log(error.message);
+            console.log('Error:', error.message);
             res.status(400);
             res.send(error.message);
         });
 });
 
 app.get('/get-databases', (req, res) => {
+    console.log("process: ", process.env);
     connect('dummy');
     influx.getDatabaseNames()
         .then(databases => {
             res.json({databases: databases});
         })
         .catch(error => {
-            console.log(error.message);
+            console.log('Error:', error.message);
         });
 });
 

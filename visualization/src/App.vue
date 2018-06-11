@@ -8,9 +8,9 @@
       <br><br>
 
       <router-link :to="{name: 'FlightSelection'}" class="menu-entry" exact-active-class="menu-entry-active">Select Flight</router-link>
-      <router-link :to="{name: 'Info'}" class="menu-entry" exact-active-class="menu-entry-active">Info</router-link>
 
       <br><br><br>
+      <a href="http://localhost:5000" class="menu-entry">RF Interface</a>
       <a href="https://aris-space.ch" class="menu-entry">ARIS homepage</a>
     </div>
     <div class="main">
@@ -22,7 +22,7 @@
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
 }
 </script>
 

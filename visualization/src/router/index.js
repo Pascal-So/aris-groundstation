@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Overview from '@/components/Overview'
 import FlightSelection from '@/components/FlightSelection'
-import HelloWorld from '@/components/HelloWorld'
 
 Vue.use(Router)
 
@@ -19,10 +18,5 @@ export default new Router({
       component: Overview,
       props: true,
     },
-    {
-      path: '/info',
-      name: 'Info',
-      component: HelloWorld
-    }
   ]
 })

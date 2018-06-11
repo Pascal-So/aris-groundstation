@@ -12,9 +12,7 @@ WORKDIR ~
 
 COPY package*.json ./
 
-RUN npm i npm@latest -g
-
-RUN npm install --quiet
+RUN npm i npm@latest -g && npm install --quiet
 
 
 COPY . .

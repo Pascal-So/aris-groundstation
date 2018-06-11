@@ -4,54 +4,31 @@ services:
 
   influx:
     image: influxdb:1.4
-    #ports:
-    #  - 8086:8086
+    volumes:
+      - ./container-data/database:/var/lib/influxdb
+    ports:
+      - 8086:8086
 
-  mysql:
-    image: mysql:5.7.21
-    env_file:
-      - ./.env
-    environment:
-      - MYSQL_DATABASE=wordpress
-
-  mysql-mediawiki:
-    image: mysql:5.7.21
-    env_file:
-      - ./.env
-    environment:
-      - MYSQL_DATABASE=mediawiki
-
-  wordpress:
-    image: wordpress:php7.0
+  grafana: # uncomment this if u need raw data access
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - ./container-data/grafana:/var/lib/grafana
     depends_on:
-      - mysql
-    env_file:
-      - ./.env
-    environment:
-      - VIRTUAL_HOST=wp.codelis.local
+      - "influx"
 
-  mediawiki:
-    image: mediawiki:stable
+  data-provider: # node server that gets data from influxdb and sends to browser
+    build: ./server
+    ports:
+      - 8080:8080
+
+  visualization: # apache server that servers visualization webapp to client
+                 # Note: this container takes a long time to build, so if you
+                 # don't have time for that, run `npm run dev` instead in the
+                 # `visualization` directory AFTER running `docker-compose up`.
+    build: ./visualization
     depends_on:
-      - mysql-mediawiki
-    environment:
-      - VIRTUAL_HOST=mw.codelis.local
-      - MYSQL_DATABASE=mediawiki
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=asdfasdf
-    volumes:
-      - ./mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
-
-  apache:
-    image: httpd:2.4
-    environment:
-      - VIRTUAL_HOST=visualization.codelis.local
-    volumes:
-      - ./archive:/usr/local/apache2/htdocs/
-
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock
+      - "data-provider"
     ports:
       - 80:80
