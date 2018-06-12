@@ -18,7 +18,7 @@ from digi.xbee.devices import XBeeDevice
 PORT = "/USB"
 #PORT = "/dev/ttyUSB0"
 
-BAUD_RATE = 9600
+BAUD_RATE = 115200
 
 rf_device = None
 

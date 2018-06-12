@@ -23,6 +23,14 @@ Start the docker containers on the groundstation laptop with `sudo docker-compse
 
 The flight data is received from the usb device specified in the `docker-compose.yml` file and stored in an InfluxDB Database with the name `flight-Y-m-d-H-M-S`.
 
+## Troubleshooting
+
+### xbee module
+If you can't connect to the module, check if the baud rate in `rfInterface/xbee.py` is correct.
+
+### Streaming data to Server
+You need to be connected to the vpn network.
+
 ## Containers
 
 ### influx

@@ -8,7 +8,7 @@ const DATA_FRAME_INTERVAL = 50 // ms;
 
 // construct InfluxDB query string
 function selectString(fields, measurement, start_time, end_time){
-    const str = `SELECT ${fields.map(name => `first(${name}) as ${name}`).join(', ')} FROM ${measurement} `
+    const str = `SELECT ${fields.map(name => `last(${name}) as ${name}`).join(', ')} FROM ${measurement} `
         + `WHERE time >= ${start_time} and time < ${end_time} GROUP BY time(${DATA_FRAME_INTERVAL}ms) fill(previous) limit ${send_max_frames}`;
     return str;
 }
@@ -162,7 +162,7 @@ const PORT = 8080;
 const containerized = true;
 const HOST = containerized ? 'data-provider' : '0.0.0.0';
 
-const send_max_frames = 200;//10000;
+const send_max_frames = 400;
 const use_cache = false;
 
 

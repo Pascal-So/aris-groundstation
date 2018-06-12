@@ -1,12 +1,5 @@
 event ids:
 
-03 [changed to ready state] [param:from state #]
-04 [changed to pre-launch state] [param:from state #]
-05 [changed to motor-burn state] [param:from state #]
-06 [changed to braking state] [param:from state #]
-07 [changed to apogee state] [param:from state #]
-08 [changed to drogue-parachute state] [param:from state #]
-09 [changed to main-parachute state] [param:from state #]
-10 [changed to post-flight state] [param:from state #]
+10 [state change] [param1: from state #, param2: to state #]
 20 [avionics-status] [param: encoded status, need to define]
 30 [avionics test finished] [param: encoded test results, need to define]

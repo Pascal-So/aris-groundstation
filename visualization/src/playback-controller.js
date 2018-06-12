@@ -7,7 +7,7 @@ function PlaybackController(database){
     var last_requested_data_time;
     var playback_time; // in milliseconds data time
 
-    const playback_speed = 1.0;
+    const playback_speed = 1.0; // use this for debugging
 
     var viewLoop_timeout_object; // storing the timeout that then calls the next viewLoop iteration
 
@@ -30,19 +30,23 @@ function PlaybackController(database){
         var new_playback_time = playback_time + view_update_interval;
 
         const range = store.getters.storedDataRange;
+        const in_range = range && (playback_time >= range.start && playback_time <= range.end)
+
         if(range){
             new_playback_time = Math.min(new_playback_time, range.end);
         }else{
             new_playback_time = playback_time;
         }
 
-        if(range && (playback_time < range.start || playback_time > range.end)){
+        if(range && !in_range){
             getNewData(playback_time);
             console.log("jumped outside stored data range:", playback_time);
             // we jumped outside the range and are still waiting for the data.
         }else if(!range || playback_time + Config.fetch_ahead_time > range.end){
             getNewData(range ? range.end : playback_time);
-        }else if(range && new_playback_time > playback_time){ // we have data to show
+        }
+
+        if(in_range && new_playback_time > playback_time){ // we have data to show
             const show_data = store.state.data.filter(frame => {
                 return frame.time >= playback_time && frame.time < new_playback_time;
             });
@@ -75,6 +79,13 @@ function PlaybackController(database){
                 }else{
                     //mergeData(res)
                     console.log(`Received data, requested starttime is ${start_time}.`);
+                    if(start_time === last_requested_data_time){
+                        // this is needed because otherwise, playback would never resume if the client
+                        // requested more server from the data, but the server doesn't have the data yet.
+                        // As a consequence of this, the client will keep trying when reaching the end of
+                        // flight, but we don't care about that too much.
+                        last_requested_data_time = null;
+                    }
                     store.commit('merge', res);
                 }
             })

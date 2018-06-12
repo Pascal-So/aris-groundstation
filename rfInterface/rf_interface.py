@@ -10,44 +10,99 @@ from control_server.control_server import run_control_server
 # on my machine this needs to be run as admin, which means the digi-xbee
 # python package needs to be installed for admin as well.
 
+# see file ../sensor_ids.txt for more information
 sensor_id_table = {
-    0: 'event',
-    1: 'accelerometer',
-    2: 'gyroscope',
-    3: 'barometer1',
-    4: 'barometer2',
-    5: 'magnetometer',
-    6: 'climate',
-    7: 'gps1',
-    8: 'gps2',
-    9: 'batteries',
+    0: {
+        "measurement": 'event',
+        "encoding": 'III',
+        "fields": ['id', 'param1', 'param2'],
+    },
+    1: {
+        "measurement": 'acc',
+        "encoding": 'fff',
+        "fields": ['x', 'y', 'z'],
+    },
+    2: {
+        "measurement": 'gyro',
+        "encoding": 'fff',
+        "fields": ['x', 'y', 'z'],
+    },
+    3: {
+        "measurement": 'bar1',
+        "encoding": 'fff',
+        "fields": ['pa', 'alt', 'temp'],
+    },
+    4: {
+        "measurement": 'bar2',
+        "encoding": 'fff',
+        "fields": ['pa', 'alt', 'temp'],
+    },
+    5: {
+        "measurement": 'mag',
+        "encoding": 'fff',
+        "fields": ['x', 'y', 'z'],
+    },
+    6: {
+        "measurement": 'cli',
+        "encoding": 'fff',
+        "fields": ['pa', 'temp', 'humid'],
+    },
+    7: {
+        "measurement": 'gps1',
+        "encoding": 'ff',
+        "fields": ['lat', 'long'],
+    },
+    8: {
+        "measurement": 'gps2',
+        "encoding": 'ff',
+        "fields": ['lat', 'long'],
+    },
+    9: {
+        "measurement": 'bat',
+        "encoding": 'f',
+        "fields": ['perc'],
+    },
 
-    101: 'pos',
-    102: 'rot',
-    103: 'vel'
-}
-
-events_table = {
-    
+    101: {
+        "measurement": 'pos',
+        "encoding": 'ffff',
+        "fields": ['x', 'y', 'z', 'z2'],
+    },
+    102: {
+        "measurement": 'rot',
+        "encoding": 'ffff',
+        "fields": ['x', 'y', 'z', 'w'],
+    },
+    103: {
+        "measurement": 'vel',
+        "encoding": 'fff',
+        "fields": ['x', 'y', 'z'],
+    },
 }
 
 def parseMessage(bytestream):
     # bytestream unpacking: https://docs.python.org/3/library/struct.html#format-characters
     # '>' denotes big endian
-    (timestamp_ms, sensor_id, data0, data1, data2, data3) = struct.unpack('>IBffff', bytestream);
+    (timestamp_ms, sensor_id) = struct.unpack('>IB', bytestream[:5]);
     
     if not sensor_id in sensor_id_table:
         print("Unknown sensor_id:", sensor_id, flush=True)
         return []
 
-    measurement = sensor_id_table[sensor_id]
+    sensor_info = sensor_id_table[sensor_id]
+    bytestream_length = 4 + 1 + len(sensor_info.encoding) * 4
+    # ignore further data in the bytestream
+    decoded_data = struct.unpack('>IB' + sensor_info.encoding, bytestream[bytestream_length])
+
+    fields = {}
+    for i in range(len(sensor_info.fields)):
+        field = sensor_info.fields[i]
+        fields[field] = decoded_data[i + 2]
 
     return {
-        "measurement": measurement,
-        "time": timestamp_ms, # TODO what do we need here? string/int ms/ns??
-        "fields": {
-            "value": 0.64
-        }
+        "measurement": sensor_info.measurement,
+        "time": str(timestamp_ms), # TODO what do we need here? string/int ms/ns??
+        "fields": fields,
     }
 
 
@@ -78,8 +133,9 @@ def main():
             time.sleep(1)
 
     except Exception as ex:
-        print(ex)
+        print("Error:", ex)
     finally:
+        print("closing connection to xbee", flush=True)
         xbee_close()
 
 if __name__ == '__main__':

@@ -36,7 +36,7 @@ def ifdb_send_data():
         while not ifdb_data_queue.empty():
             send_data.append(ifdb_data_queue.get())
 
-        print('Sending {0:d} data ponits to InfluxDB'.format(len(send_data)))
+        print('Sending {0:d} data ponits to InfluxDB'.format(len(send_data)), flush=True)
 
         for client in ifdb_clients:
             try:
