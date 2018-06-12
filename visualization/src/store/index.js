@@ -39,9 +39,19 @@ export default new Vuex.Store({
                 };
             });
 
+            const acceleration = state.data.map(frame => {
+                const sq = frame.acc.x * frame.acc.x + frame.acc.y * frame.acc.y + frame.acc.z * frame.acc.z;
+
+                return {
+                    x: frame.time / 1000,
+                    y: Math.sqrt(sq),
+                };
+            });
+
             return {
                 altitude: altitude,
                 velocity_z: velocity_z,
+                acceleration: acceleration,
             };
         },
     },

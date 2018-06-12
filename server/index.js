@@ -7,10 +7,22 @@ const DATA_FRAME_INTERVAL = 50 // ms;
 // ################## IFDB magic functions ######################
 
 // construct InfluxDB query string
-function selectString(fields, measurement, start_time, end_time){
+function selectSensorString(fields, measurement, start_time, end_time){
     const str = `SELECT ${fields.map(name => `last(${name}) as ${name}`).join(', ')} FROM ${measurement} `
-        + `WHERE time >= ${start_time} and time < ${end_time} GROUP BY time(${DATA_FRAME_INTERVAL}ms) fill(previous) limit ${send_max_frames}`;
+        + `WHERE time >= ${start_time} and time <= ${end_time} GROUP BY time(${DATA_FRAME_INTERVAL}ms) fill(previous) limit ${send_max_frames}`;
     return str;
+}
+
+function runEventQuery(influx, start_time, end_time){
+    return influx.query(`SELECT * from events WHERE time >= ${milliToNano(start_time)} and time <= ${milliToNano(end_time)}.`)
+        .then(data => data.map(event_data => {
+            return {
+                time: nanoToMilli(event_data.time.getNanoTime()),
+                id: event_data.id,
+                param1: event_data.param1,
+                param2: event_data.param2,
+            };
+        }));
 }
 
 /**
@@ -18,32 +30,34 @@ function selectString(fields, measurement, start_time, end_time){
  * @param array fields   [pos: ['x', 'y', 'z'], rot: [...], ...]
  * @return Promise
  */
-function runQueries(influx, fields, start_time, end_time){
+function runSensorQueries(influx, fields, start_time, end_time){
     const promises = Object.keys(fields).map(key => {
-        const query = selectString(fields[key], key, milliToNano(start_time), milliToNano(end_time));
+        const query = selectSensorString(fields[key], key, milliToNano(start_time), milliToNano(end_time));
         console.log("Running query:", query);
-        return influx.query(query)
-            .then(data => {
-                return {'key': key, 'values': data};
-            });
+        return influx.query(query);
     });
 
     // getting data from multiple measurements out of influx is not nice
     return Promise.all(promises)
         .then(data => {
             // let's do this like it's good ol' C++
-            const k = data.length; // the amount of measurements
-            const n = data[0].values.length; // amount of rows (points in time)
+            const n = data[0].length; // amount of rows (points in time)
             var out = [];
+            
             for(var i = 0; i < n; ++i){
-                var values = {};
-                values['time'] = nanoToMilli(data[0].values[i].time.getNanoTime());
-                for(var j = 0; j < k; ++j){
-                    var vals = data[j].values[i];
-                    delete vals.time;
-                    values[data[j].key] = vals;
-                }
-                out.push(values);
+                var frame = {};
+                frame['time'] = nanoToMilli(data[0][i].time.getNanoTime());
+                Object.keys(fields).forEach((key, index) => {
+                    frame[key] = {};
+                    fields[key].forEach(field => {
+                        if(data[index][i]){
+                            frame[key][field] = data[index][i][field];
+                        }else{
+                            frame[key][field] = null;
+                        }
+                    });
+                });
+                out.push(frame);
             }
             return out;
         });
@@ -98,7 +112,7 @@ function getRangeLimits(){
  * Time coordinate is in data time, milliseconds
  *
  * @param int start_time
- * @return Promise
+ * @return Promise {'sensors', 'events'}
  */
 function getDataRange(range_limits, start_time = null){
     if(typeof start_time !== "number"){
@@ -110,13 +124,23 @@ function getDataRange(range_limits, start_time = null){
     }
     const end_time = range_limits.end;
 
-    const fields = {
+    const sensor_fields = {
         'pos': ['x', 'y', 'z'],
         'rot': ['x', 'y', 'z', 'w'],
         'vel': ['x', 'y', 'z'],
+        'acc': ['x', 'y', 'z'],
     };
 
-    return runQueries(influx, fields, start_time, end_time);
+    const sensors_promise = runSensorQueries(influx, sensor_fields, start_time, end_time);
+    const events_promise = runEventQuery(influx, start_time, end_time);
+
+    return Promise.all([sensors_promise, events_promise])
+        .then(result => {
+            return {
+                'sensors': result[0],
+                'events': result[1],
+            };
+        });
 }
 
 function connect(database){
@@ -147,6 +171,11 @@ function connect(database){
             },
             {
                 measurement: 'vel',
+                fields: xyz,
+                tags: []
+            },
+            {
+                measurement: 'acc',
                 fields: xyz,
                 tags: []
             },
@@ -308,20 +337,25 @@ app.get('/get-data', (req, res) => {
             return getDataRange(range_limits, start_data_time + range_limits.start);
         })
         .then(response_data => {
-            const send_data = response_data.slice(0, send_max_frames).map(frame => {
+            const adjust_start_lambda = (frame) => {
                 frame.time -= range_limits.start;
                 return frame;
-            });
-            console.log(`Sending ${send_data.length} frames of data`);
+            };
+
+            const send_sensors_data = response_data.sensors.slice(0, send_max_frames).map(adjust_start_lambda);
+            //const send_events_data = response_data.events.map(adjust_start_lambda);
+
+            console.log(`Sending ${send_sensors_data.length} frames of sensor data.`); //, and ${send_events_data.length} events.`);
             res.json({
-                data: send_data,
+                data: send_sensors_data,
+                //events: send_events_data,
                 info: {
                     requested_start: start_data_time,
                     flight_data_duration: range_limits.end - range_limits.start,
                 },
             });
         }).catch(error => {
-            console.log('Error:', error.message);
+            console.log('Error in getRangeLimits:', error.message);
             res.status(400);
             res.send(error.message);
         });
@@ -334,7 +368,7 @@ app.get('/get-databases', (req, res) => {
             res.json({databases: databases.filter(db => db != '_internal')});
         })
         .catch(error => {
-            console.log('Error:', error.message);
+            console.log('Error in getDatabaseNames:', error.message);
         });
 });
 

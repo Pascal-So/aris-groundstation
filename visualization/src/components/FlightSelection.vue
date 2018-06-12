@@ -2,7 +2,7 @@
   <div class="flight-selection">
     <h1>Select a flight</h1>
     <p v-if="status == 'loading'">loading...</p>
-    <p v-if="status == 'error'">Network error. plx fix then reload.</p>
+    <p v-if="status == 'error'">Network error. pls fix then reload.</p>
     <ul v-if="status == 'ok'">
       <li v-for="flight in flights" class="flight">
         <router-link :to="{name: 'Overview', params: {database: flight} }">{{ flight }}</router-link>

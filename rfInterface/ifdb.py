@@ -40,7 +40,7 @@ def ifdb_send_data():
 
         for client in ifdb_clients:
             try:
-                client.write_points(send_data)
+                client.write_points(send_data, time_precision='ms')
             except Exception as e:
                 print("InfluxDB send_data error: ", e)
 

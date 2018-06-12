@@ -83,6 +83,7 @@ sensor_id_table = {
 def parseMessage(bytestream):
     # bytestream unpacking: https://docs.python.org/3/library/struct.html#format-characters
     # '>' denotes big endian
+
     (timestamp_ms, sensor_id) = struct.unpack('>IB', bytestream[:5]);
     
     if not sensor_id in sensor_id_table:
@@ -90,31 +91,42 @@ def parseMessage(bytestream):
         return []
 
     sensor_info = sensor_id_table[sensor_id]
-    bytestream_length = 4 + 1 + len(sensor_info.encoding) * 4
+    bytestream_length = 4 + 1 + len(sensor_info['encoding']) * 4
     # ignore further data in the bytestream
-    decoded_data = struct.unpack('>IB' + sensor_info.encoding, bytestream[bytestream_length])
+    decoded_data = struct.unpack('<' + sensor_info['encoding'], bytestream[5:bytestream_length])
 
     fields = {}
-    for i in range(len(sensor_info.fields)):
-        field = sensor_info.fields[i]
-        fields[field] = decoded_data[i + 2]
+    for i in range(len(sensor_info['fields'])):
+        field = sensor_info['fields'][i]
+        fields[field] = decoded_data[i]
+
+    # timestamp_ns = str(timestamp_ms) + '000000'
+    # print('using timestamp: ', timestamp_ns, flush=True)
+    str_timestamp = datetime(1970,1,1, second=timestamp_ms // 1000, microsecond=(timestamp_ms % 1000) * 1000).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
     return {
-        "measurement": sensor_info.measurement,
-        "time": str(timestamp_ms), # TODO what do we need here? string/int ms/ns??
+        "measurement": sensor_info['measurement'],
+        "time": str_timestamp,
         "fields": fields,
     }
 
+known_modules = [
+    b'\x00\x13\xa2\x00\x41\x74\xc3\xe0',
+    b'\x00\x13\xa2\x00\x41\x74\xc3\xe4',
+    b'\x00\x13\xa2\x00\x41\x5c\xe2\xc7',
+    b'\x00\x13\xa2\x00\x41\x5c\xe2\xcb',
+    b'\x00\x13\xA2\x00\x41\x5C\xE2\xB8',
+]
 
 def data_receive_callback(xbee_message):
     sender = xbee_message.remote_device.get_64bit_addr()
-    if not sender in ['asdf', '315']:
-        print("Unknown sender", sender, flush=True)
+    if not sender.address in known_modules:
+        print("Unknown sender", sender.address, flush=True)
         return
     bytestream = xbee_message.data
     data = parseMessage(bytestream)
+    print("Received data:", data, flush=True)
     ifdb_write(data)
-    print("Received:", data, flush=True)
 
 def send_command_callback(command = None):
     if command == None or command == "":

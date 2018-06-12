@@ -28,6 +28,7 @@
       <div class="panel area-graph">
         <Graph title="Altitude" dataset="altitude"></Graph>
         <Graph title="Vertical Velocity" dataset="velocity_z"></Graph>
+        <Graph title="Acceleration magnitude" dataset="acceleration"></Graph>
       </div>
     </div>
 
