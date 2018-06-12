@@ -2,17 +2,18 @@
 
 Sensor          id      abbrev.      data format (up to 128 bits)
 
-Event           0       'event'      uint32   uint32   uint32            // event id    params 1 2 3
+Event           0       'event'      uint32   uint32   uint32                            // event id    params 1 2 3
 Accelerometer   1       'acc'        float32  float32  float32
 Gyroscope       2       'gyro'       float32  float32  float32
-Barometer1      3       'bar1'       float32  float32  float32           // druck (pascal)  alt (m)  temp (C°)
+Barometer1      3       'bar1'       float32  float32  float32                           // druck (pascal)  alt (m)  temp (C°)
 Barometer2      4       'bar2'       float32  float32  float32
 Magnetometer    5       'mag'        float32  float32  float32
-Climate         6       'cli'        float32  float32  float32           // druck (pascal)  temp (C°)  humid (%)
+Climate         6       'cli'        float32  float32  float32                           // druck (pascal)  temp (C°)  humid (%)
 GPS1            7       'gps1'       ?
 GPS2            8       'gps2'       ?
-Batteries       9       'bat'        float32                             // perc %
-                                     
+Batteries       9       'bat'        float32                                             // perc %
+
+Status          80      'state'      uint8    uint8    uint8    uint8    uint8    uint8  // pl_on, pl_alive, wifi_status, sensor_status, sd_status, control_status
 Position        101     'pos'        float32  float32  float32  float32
 Rotation        102     'rot'        float32  float32  float32  float32
 Velocity        103     'vel'        float32  float32  float32

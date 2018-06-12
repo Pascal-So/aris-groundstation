@@ -5,11 +5,8 @@
           <img src="./assets/arislogo.png" width="140">
       </header>
 
-      <br>
       <a href="http://localhost:5000" class="menu-entry">RF&nbsp;Interface</a>
       <a href="https://aris-space.ch" class="menu-entry">ARIS&nbsp;homepage</a>
-      <br>
-      <br>
     </div>
     <div class="main">
       <router-view/>
@@ -31,7 +28,7 @@ export default {
 header{
     width: 100%;
     text-align: center;
-    padding-top: 10px;
+    padding: 10px 0;
 }
 
 #app {
@@ -40,17 +37,12 @@ header{
   -moz-osx-font-smoothing: grayscale;
   text-align: left;
   color: #ddd;
-  /*margin-top: 60px;*/
 }
 
 .sidebar{
   background-color: #100F11;
   text-align: center;
-  /*position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;*/
-  /*width: 180px;*/
+  padding-bottom: 5px;
 }
 
 .menu-entry{
@@ -69,6 +61,6 @@ header{
 }
 
 .main{
-  padding: 10px;
+  padding: 10px 10px 0;
 }
 </style>

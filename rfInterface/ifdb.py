@@ -8,8 +8,8 @@ ifdb_clients = []
 def ifdb_connect(database_name):
     global ifdb_clients
     ifdb_clients = [
-        InfluxDBClient('influx', 8086, 'root', 'root', database_name),
-        InfluxDBClient('10.8.0.1', 8086, 'root', 'root', database_name, timeout=1),
+        # InfluxDBClient('influx', 8086, 'root', 'root', database_name, retries=100),
+        # InfluxDBClient('10.8.0.1', 8086, 'root', 'root', database_name, timeout=1),
     ]
 
     for client in ifdb_clients:
@@ -38,10 +38,11 @@ def ifdb_send_data():
 
         print('Sending {0:d} data ponits to InfluxDB'.format(len(send_data)), flush=True)
 
-        for client in ifdb_clients:
-            try:
-                client.write_points(send_data, time_precision='ms')
-            except Exception as e:
-                print("InfluxDB send_data error: ", e)
+        if len(send_data) > 0:
+            for client in ifdb_clients:
+                try:
+                    client.write_points(send_data, time_precision='ms')
+                except Exception as e:
+                    print("InfluxDB send_data error: ", e)
 
-        time.sleep(4)
+        time.sleep(3)

@@ -8,19 +8,16 @@ services:
       - ./container-data/database:/var/lib/influxdb
     ports:
       - 8086:8086
-    env_file:
-      - .env
 
-  # receiver: # python script communicating with xbee
-  #   build: ./rfInterface/
-  #   devices:  # Change the devce to the usb port where the xbee module is connected
-  #    - "/dev/ttyUSB0:/USB"
-  #   depends_on:
-  #     - "influx"
-  #   ports:
-  #     - 5000:5000
-  #   env_file:
-  #     - .env
+  receiver: # python script communicating with xbee
+    build: ./rfInterface/
+    devices:  # Change the devce to the usb port where the xbee module is connected
+     - "/dev/ttyUSB0:/USB"
+    depends_on:
+      - "influx"
+    ports:
+      - 5000:5000
+    restart: unless-stopped
 
   # grafana: # uncomment this if u need raw data access
   #   image: grafana/grafana
@@ -35,8 +32,6 @@ services:
     build: ./server
     ports:
       - 8080:8080
-    env_file:
-      - .env
 
   # visualization: # apache server that servers visualization webapp to client
   #                # Note: this container takes a long time to build, so if you

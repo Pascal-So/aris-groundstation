@@ -8,6 +8,18 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     state: {
         data: [],
+        events: [
+            {
+                id: 10,
+                params: [3, 1],
+                time: 1200,
+            },
+            {
+                id: 10,
+                params: [5, 3],
+                time: 2350,
+            },
+        ],
         duration: null,
     },
     getters: {
@@ -23,6 +35,9 @@ export default new Vuex.Store({
                 start: start,
                 end: end,
             };
+        },
+        events: state => {
+            return state.events;
         },
         graphFormattedData: state => {
             const altitude = state.data.map(frame => {
@@ -56,9 +71,10 @@ export default new Vuex.Store({
         },
     },
     mutations: {
-        merge (state, res) {
-            state.duration = res.info.flight_data_duration;
-            const new_data = res.data;
+        merge (state, received_data) {
+            state.duration = received_data.info.flight_data_duration;
+            const new_data = received_data.data;
+            const new_events = received_data.events;
 
             if(new_data.length == 0){
                 return;
@@ -73,9 +89,15 @@ export default new Vuex.Store({
                 const append_data = new_data.filter(frame => {
                     return frame.time > state.data[state.data.length - 1].time;
                 });
+                const append_events = new_events.filter(frame => {
+                    return frame.time > state.data[state.data.length - 1].time;
+                });
                 state.data = state.data.concat(append_data);
+                state.events = state.events.concat(append_events);
             }else{
                 state.data = new_data;
+                state.events = new_events;
+                
                 // reset views, e.g. clear trajectory line in 3d viz, because we'd have a jump otherwise
                 EventBus.$emit('reset-views');
             }

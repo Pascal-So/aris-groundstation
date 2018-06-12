@@ -151,7 +151,7 @@ function connect(database){
     };
 
     influx = new Influx.InfluxDB({
-        host: containerized ? 'influx' : 'localhost',
+        host: INFLUX_HOST,
         database: database,
         schema: [
             {
@@ -190,67 +190,9 @@ var influx = null;
 const PORT = 8080;
 const containerized = true;
 const HOST = containerized ? 'data-provider' : '0.0.0.0';
+const INFLUX_HOST = containerized ? 'influx' : 'localhost';
 
 const send_max_frames = 400;
-const use_cache = false;
-
-
-// ###################### THE STATE ###########################
-var state = {
-    data: null,
-    acquired_data_server_time: 0, // timestamp in server time
-    updating: true,
-};
-
-// larger values for keep_data_duration means more lag for playback, but also
-// less refetching from the db. Increase when expecing clients with large ping
-// times.
-const keep_data_duration = 1000; // millisecond duration
-
-function cachedDataRange(){
-    if(state.data === null || state.data.length == 0){
-        return null;
-    }
-
-    const start = state.data[0].time;
-    const end = state.data[state.data.length - 1].time;
-
-    return {
-        start: start,
-        end: end,
-    }
-}
-
-/*
-uncomment when cache is activated. Now that not every request goes to the same database, we'll have to add a
-database distinction. Maybe even figure out a way to detect the actively growing database.
-
-Ideally we'd just scrap the cache if influxdb (and the server this is gonna be running on) can handle the
-expected amount of requests.
-
-function keepStateUpdated(){
-    let current_server_time = Date.now(); // server time in ms timestamp
-    let update_server_time = state.acquired_data_server_time + keep_data_duration;
-    if((state.data === null || current_server_time > update_server_time) && !state.updating){
-        // update state
-        console.log('Updating cached flight data with new data from IFDB.');
-        state.updating = true;
-
-        const range = cachedDataRange();
-        const last_data_time = range ? range.end : null;
-        
-        getRangeLimits()
-            .then(range_limits => getDataRange(range_limits, last_data_time))
-            .then(data => {
-                state.acquired_data_server_time = Date.now();
-                state.data = data;
-                state.updating = false;
-            });
-    }else{
-        // do nothing, we still have relatively fresh data in cache
-    }
-}
-*/
 
 
 // ############### hanle HTTP requests ##########################
@@ -279,8 +221,6 @@ const app = express();
 app.use(cors());
 app.get('/get-data', (req, res) => {
 
-    if(use_cache) keepStateUpdated();
-
     const database = req.query.db;
     if(!database || database == ''){
         console.log(`Request with missing database selection.`);        
@@ -298,38 +238,7 @@ app.get('/get-data', (req, res) => {
     }
 
     console.log(`Received request for data form '${start_data_time}', database '${database}'.`);
-    /*
-    commented out cache functionality to remove distraction for now
 
-    if(use_cache){
-        const cached_range = cachedDataRange();
-        if(cached_range !== null && start_data_time > cached_range.end){
-            // don't have this data yet
-            res.json(null);
-            return;
-        }
-        if(cached_range !== null && cached_range.start <= start_data_time){
-            const response_data = state.data.filter(frame => {
-                // TODO: this part is wrong. We can't just compare the data times here,
-                // because these timestamps are stored as strings (might be too big for
-                // storing as int), so comparison does not give meaningful results.
-                frame.time >= start_time; 
-            });
-
-            const response = {
-                data: response_data.slice(send_max_frames),
-                info: {
-                    requested_start: start_data_time,
-                },
-            }
-
-            res.json(response);
-            return;
-        }
-    }*/
-
-
-    // fetch data from before cache
     var range_limits = null;
     getRangeLimits()
         .then(limits => {
@@ -348,7 +257,7 @@ app.get('/get-data', (req, res) => {
             console.log(`Sending ${send_sensors_data.length} frames of sensor data.`); //, and ${send_events_data.length} events.`);
             res.json({
                 data: send_sensors_data,
-                //events: send_events_data,
+                events: send_events_data,
                 info: {
                     requested_start: start_data_time,
                     flight_data_duration: range_limits.end - range_limits.start,

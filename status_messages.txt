@@ -1,0 +1,10 @@
+status messages:
+
+[32 bit timestamp], [8 bit sensor_id], [8 bit pl_on],[8 bit pl_alive], [8 bit wifi_status], [8 bit sensor_status],[8 bit sd_status], [8 bit control_status]
+
+Payload Activated
+Payload Alive
+Wifi Status
+Sensor Status
+SD Status
+Control Status

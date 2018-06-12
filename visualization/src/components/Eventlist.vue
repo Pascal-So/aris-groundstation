@@ -1,5 +1,5 @@
 <template>
-  <div class="eventlist">
+  <div id="eventlist">
     <h3>Events</h3>
     <ul>
       <li v-for="event in events" class="event">
@@ -12,32 +12,20 @@
 
 <script>
 
-import { EventBus } from '../event-bus.js';
+import { mapState } from 'vuex';
 
 export default {
   name: 'Eventlist',
   data () {
     return {
-      events: [
-        {
-          id: 10,
-          params: [1, 3],
-          time: 1.2,
-        }
-      ]
-    }
+    };
   },
-  mounted () {
-    EventBus.$on('new-data', this.newData);
-    EventBus.$on('reset-views', this.reset);
-    EventBus.$on('change-playback-time', this.reset);
+  computed: {
+    ...mapState({
+      events: state => state.events,
+    }),
   },
   methods: {
-    newData (data) {
-    },
-    reset () {
-      //this.events = [];
-    },
     eventText (id, params) {
       // see file `/event_ids.txt`
       var text = '';
@@ -54,7 +42,7 @@ export default {
       };
       switch(id){
         case 10:
-          text = `Switched from state ${params[0]}: '${states[params[0]]}' to state ${params[1]}: '${states[params[1]]}'.`;
+          text = `State '${states[params[1]]}' -> '${states[params[0]]}'`;
           break;
         case 20:
           text = `Avionics status: ${params}`;
@@ -81,17 +69,22 @@ export default {
     padding: 0 5px;
   }
 
-  .eventlist{
+  h2{
+    font-size: 17px;
+  }
+
+  #eventlist{
     padding: 0 10px;
   }
 
   .event{
     background-color: #1D1C1F;
-    margin: 10px 0;
-    padding: 5px 10px;
+    margin: 5px 0;
+    padding: 3px 10px;
+    border: 1px solid #222;
   }
 
   .event p, .event h2{
-    margin: 5px 0;
+    margin: 3px 0;
   }
 </style>

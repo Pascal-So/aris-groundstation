@@ -1,5 +1,7 @@
 event ids:
 
-10 [state change] [param1: from state #, param2: to state #]
-20 [avionics-status] [param: encoded status, need to define]
-30 [avionics test finished] [param: encoded test results, need to define]
+10 [state change] [param1: to state #, param2: from state #]
+
+30 [avionics test finished] [param1: (32 bit) test result] -> param1 = 0 means all tests successful
+
+id uint32,  param1 uint32,  param2 uint32    -> 12 bytes

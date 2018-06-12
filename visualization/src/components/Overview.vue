@@ -6,10 +6,10 @@
         <h2>{{ database }}</h2><br>
         <router-link :to="{name: 'FlightSelection'}" exact-active-class="menu-entry-active">Other Flights</router-link>
       </div>
-      <div class="infoblock">
+      <!-- <div class="infoblock">
         <h3>Max Alt:</h3>
         <h2>{{ max_alt.toFixed(2) }}m</h2>
-      </div>
+      </div> -->
     </div>
 
     <div class="playback-fixed">
@@ -22,18 +22,15 @@
       <div class="panel area-viz">
         <Visualization class="fill"/>
       </div>
-      <div class="panel area-event">
+      <div class="panel scrollpanel area-event">
         <Eventlist/>
       </div>
-      <div class="panel area-graph">
+      <div class="panel scrollpanel area-graph">
         <Graph title="Altitude" dataset="altitude"></Graph>
         <Graph title="Vertical Velocity" dataset="velocity_z"></Graph>
         <Graph title="Acceleration magnitude" dataset="acceleration"></Graph>
       </div>
     </div>
-
-    <br><br>
-
   </div>
 </template>
 
@@ -102,7 +99,7 @@ a:visited{
 
 #overview{
   color: #CECECE;
-  padding-bottom: 70px;
+  padding-bottom: 0;
 }
 
 .grid{
@@ -126,6 +123,11 @@ a:visited{
   border-radius: 3px;
   position: relative;
   box-shadow: 4px 4px rgba(0,0,0,0.3);
+  height: 630px;
+}
+
+.scrollpanel {
+  overflow-y: scroll;
 }
 
 .fill{
@@ -172,6 +174,10 @@ a:visited{
     border-top: 3px solid #0c0c0c;
   }
 
+  #overview{
+    padding-bottom: 75px;
+  }
+
   .grid{
     grid-template-columns: 1fr 0.6fr;
     grid-template-areas: 
@@ -192,7 +198,7 @@ a:visited{
   }
 
   .panel{
-    min-height: 600px;
+    height: 500px;
   }
 
   .infoblock h3{
@@ -223,10 +229,6 @@ a:visited{
   .area-viz{
     grid-area: c; 
   }
-
-  .panel{
-    min-height: 500px;
-  }
 }
 
 @media(max-width: 530px){
@@ -239,7 +241,7 @@ a:visited{
   }
 
   .panel{
-    min-height: 400px;
+    height: 400px;
   }
 }
 </style>
