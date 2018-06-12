@@ -35,7 +35,6 @@ function RocketViz(element){
    *  Clear data for restarting flight
    */
   this.reset = () => {
-    console.log("resetting rocket viz")
     current_trail_points = 0;
   }
 

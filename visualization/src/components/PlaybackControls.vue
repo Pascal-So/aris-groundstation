@@ -2,13 +2,19 @@
   <div class="playback-controls">
     <h2>
       <span @click="play_pause" class="play-button">
-        <span v-if="!playing">▶</span>
-        <span v-if="playing">▮▮</span>
+        <span v-if="!playing"><img class="playback-control-icons" src="../assets/play.svg"></span> <!-- ▶ -->
+        <span v-if="playing"><img class="playback-control-icons" src="../assets/pause.svg"></span> <!-- ▮▮ -->
       </span>
 
       {{ renderTime(playback_time) }}
     </h2>
-    <div class="bar-outer" @click="clicked_bar" @mouseleave="leave_bar" @mousemove="hover_bar">
+    <div class="bar-outer" 
+      @click="clicked_bar" 
+      @mousemove="hover_bar"
+      @mouseleave="leave_bar" 
+      @touchmove="hover_bar"
+      @touchend="(ev) => {leave_bar(ev); clicked_bar(ev);}"
+      >
       <div class="hover-box" v-if="hovering_bar" :style="{left: `calc(${hovering_percent} - 40px`}"><p>{{ renderTime(hover_time) }}</p></div>
       <div class="bar-inner" :style="{width: playback_progress_percent}"></div>
       <div class="bar-loaded-indicator" :style="{left: loaded_left_percent, right: loaded_right_percent}"></div>
@@ -59,7 +65,14 @@ export default {
     calculate_time(ev) {
       const targetRect = ev.currentTarget.getBoundingClientRect()
 
-      const x = ev.pageX - targetRect.left;
+      const is_touch_event = ev.type.substr(0,5) == 'touch';
+
+      if(is_touch_event && ev.touches.length === 0){
+        return this.hover_time;
+      }
+
+      const pageX = (is_touch_event ? ev.touches[0] : ev).pageX;
+      const x = pageX - targetRect.left;
       const fraction = x / targetRect.width;
 
       const time = Math.trunc(fraction * this.flight_duration);
@@ -139,6 +152,10 @@ h2{
 
 .playback-controls{
   text-align: center;
+}
+
+.playback-control-icons{
+  height: 15px;
 }
 
 .bar-outer{
