@@ -6,10 +6,6 @@
         <h2>{{ database }}</h2><br>
         <router-link :to="{name: 'FlightSelection'}" exact-active-class="menu-entry-active">Other Flights</router-link>
       </div>
-      <!-- <div class="infoblock">
-        <h3>Max Alt:</h3>
-        <h2>{{ max_alt.toFixed(2) }}m</h2>
-      </div> -->
     </div>
 
     <div class="playback-fixed">
@@ -24,6 +20,9 @@
       </div>
       <div class="panel scrollpanel area-event">
         <Eventlist/>
+      </div>
+      <div class="panel scrollpanel area-status">
+        <StatusDisplay/>
       </div>
       <div class="panel scrollpanel area-graph">
         <Graph title="Altitude" dataset="altitude"></Graph>
@@ -41,6 +40,7 @@ import Eventlist from './Eventlist.vue';
 import Visualization from './Visualization.vue';
 import { EventBus } from '../event-bus.js';
 import PlaybackControls from './PlaybackControls.vue';
+import StatusDisplay from './StatusDisplay.vue';
 import PlaybackController from '../playback-controller';
 import store from '../store'
 
@@ -50,20 +50,17 @@ export default {
     'Eventlist': Eventlist,
     'Visualization': Visualization,
     'PlaybackControls': PlaybackControls,
+    'StatusDisplay': StatusDisplay,
   },
   name: 'Overview',
   props: ['database'],
   data () {
     return {
-      max_alt: 0,
       controller: null,
     }
   },
   mounted () {
     this.controller = new PlaybackController(this.database);
-
-    EventBus.$on('new-data', this.newData);
-    EventBus.$on('reset-views', () => {this.max_alt = 0;});
   },
   beforeDestroy () {
     store.commit('clear');
@@ -72,13 +69,6 @@ export default {
     this.controller = null;
     console.log("destroying Overview Component");
   },
-  methods: {
-    newData(new_data){
-      new_data.forEach(frame => {
-        this.max_alt = Math.max(this.max_alt, frame.pos.z);
-      });
-    }
-  }
 }
 </script>
 
@@ -106,8 +96,18 @@ a:visited{
   display: grid;
   grid-gap: 13px;
   grid-template-columns: 1.5fr 1fr 1.5fr;
+  grid-template-rows: 1.5fr 1fr;
+  grid-template-areas:
+    "viz event  graph"
+    "viz status graph";
   grid-auto-rows: auto;
+  height: 700px;
 }
+
+.area-viz { grid-area: viz; }
+.area-event { grid-area: event; }
+.area-status { grid-area: status; }
+.area-graph { grid-area: graph; }
 
 .flexrow{
   display: flex;
@@ -123,11 +123,11 @@ a:visited{
   border-radius: 3px;
   position: relative;
   box-shadow: 4px 4px rgba(0,0,0,0.3);
-  height: 630px;
+  /*height: 630px;*/
 }
 
 .scrollpanel {
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .fill{
@@ -180,25 +180,11 @@ a:visited{
 
   .grid{
     grid-template-columns: 1fr 0.6fr;
+    grid-template-rows: 1fr 1fr;
     grid-template-areas: 
-        "a b"
-        "c c";
-  }
-
-  .area-graph{
-    grid-area: c;
-  }
-
-  .area-event{
-    grid-area: b; 
-  }
-
-  .area-viz{
-    grid-area: a; 
-  }
-
-  .panel{
-    height: 500px;
+        "viz   event "
+        "graph status";
+    height: 900px;
   }
 
   .infoblock h3{
@@ -212,22 +198,13 @@ a:visited{
 @media(max-width: 700px){
   .grid{
     grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr 0.7fr 1fr;
     grid-template-areas: 
-        "a"
-        "b"
-        "c";
-  }
-
-  .area-graph{
-    grid-area: a;
-  }
-
-  .area-event{
-    grid-area: b; 
-  }
-
-  .area-viz{
-    grid-area: c; 
+        "graph"
+        "event"
+        "status"
+        "viz";
+    height: 1600px;
   }
 }
 
@@ -240,8 +217,8 @@ a:visited{
     font-size: 20px;
   }
 
-  .panel{
-    height: 400px;
+  .grid{
+    height: 1500px;
   }
 }
 </style>

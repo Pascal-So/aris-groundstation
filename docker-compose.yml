@@ -9,15 +9,15 @@ services:
     ports:
       - 8086:8086
 
-  receiver: # python script communicating with xbee
-    build: ./rfInterface/
-    devices:  # Change the devce to the usb port where the xbee module is connected
-     - "/dev/ttyUSB0:/USB"
-    depends_on:
-      - "influx"
-    ports:
-      - 5000:5000
-    restart: unless-stopped
+  # receiver: # python script communicating with xbee
+  #   build: ./rfInterface/
+  #   devices:  # Change the devce to the usb port where the xbee module is connected
+  #    - "/dev/ttyUSB0:/USB"
+  #   depends_on:
+  #     - "influx"
+  #   ports:
+  #     - 5000:5000
+  #   restart: unless-stopped
 
   # grafana: # uncomment this if u need raw data access
   #   image: grafana/grafana

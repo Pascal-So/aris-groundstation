@@ -64,7 +64,7 @@ export default {
             ticks: {
               fontColor: tickColor,
               suggestedMin: 0,
-              suggestedMax: 50
+              suggestedMax: 1,
             }
           }],
           xAxes: [{

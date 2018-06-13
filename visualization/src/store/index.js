@@ -9,16 +9,16 @@ export default new Vuex.Store({
     state: {
         data: [],
         events: [
-            {
-                id: 10,
-                params: [3, 1],
-                time: 1200,
-            },
-            {
-                id: 10,
-                params: [5, 3],
-                time: 2350,
-            },
+            // {
+            //     id: 10,
+            //     params: [3, 1],
+            //     time: 1200,
+            // },
+            // {
+            //     id: 10,
+            //     params: [5, 3],
+            //     time: 2350,
+            // },
         ],
         duration: null,
     },

@@ -51,7 +51,7 @@ function runSensorQueries(influx, fields, start_time, end_time){
                     frame[key] = {};
                     fields[key].forEach(field => {
                         if(data[index][i]){
-                            frame[key][field] = data[index][i][field];
+                            frame[key][field] = data[index][i][field] || null;
                         }else{
                             frame[key][field] = null;
                         }
@@ -124,11 +124,15 @@ function getDataRange(range_limits, start_time = null){
     }
     const end_time = range_limits.end;
 
+    // see files `/sensor_ids.txt` and '/rfInterface/rf_interface.py'
     const sensor_fields = {
         'pos': ['x', 'y', 'z'],
         'rot': ['x', 'y', 'z', 'w'],
         'vel': ['x', 'y', 'z'],
         'acc': ['x', 'y', 'z'],
+        'gps1': ['lat', 'long'],
+        'bar1': ['pa', 'alt', 'temp'],
+        'status': ['pl_on', 'pl_alive', 'wifi_status', 'sensor_status', 'sd_status', 'control_status'],
     };
 
     const sensors_promise = runSensorQueries(influx, sensor_fields, start_time, end_time);
@@ -252,9 +256,9 @@ app.get('/get-data', (req, res) => {
             };
 
             const send_sensors_data = response_data.sensors.slice(0, send_max_frames).map(adjust_start_lambda);
-            //const send_events_data = response_data.events.map(adjust_start_lambda);
+            const send_events_data = response_data.events.map(adjust_start_lambda);
 
-            console.log(`Sending ${send_sensors_data.length} frames of sensor data.`); //, and ${send_events_data.length} events.`);
+            console.log(`Sending ${send_sensors_data.length} frames of sensor data, and ${send_events_data.length} events.`);
             res.json({
                 data: send_sensors_data,
                 events: send_events_data,
