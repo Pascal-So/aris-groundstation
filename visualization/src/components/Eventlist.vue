@@ -4,7 +4,7 @@
     <ul>
       <li v-for="event in events" class="event">
         <p>{{ renderTime(event.time) }}</p>
-        <h2>{{ eventText(event.id, event.params) }}</h2>
+        <h2>{{ eventText(event.id, event.param1, event.param2) }}</h2>
       </li>
     </ul>
   </div>
@@ -26,7 +26,7 @@ export default {
     }),
   },
   methods: {
-    eventText (id, params) {
+    eventText (id, param1, param2) {
       // see file `/event_ids.txt`
       var text = '';
       const states = {
@@ -42,13 +42,10 @@ export default {
       };
       switch(id){
         case 10:
-          text = `State '${states[params[1]]}' -> '${states[params[0]]}'`;
-          break;
-        case 20:
-          text = `Avionics status: ${params}`;
+          text = `State '${states[param2]}' -> '${states[param1]}'`;
           break;
         case 30:
-          text = `Avionics test finisshed. Results: ${params}`;
+          text = `Avionics test finisshed. Results: ${param1}, ${param2}`;
           break;
       }
 

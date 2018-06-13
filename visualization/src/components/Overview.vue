@@ -94,7 +94,7 @@ a:visited{
   display: grid;
   grid-gap: 13px;
   grid-template-columns: 1.5fr 1fr 1.5fr;
-  grid-template-rows: 1.5fr 1fr;
+  grid-template-rows: 1.7fr 1fr;
   grid-template-areas:
     "viz event  graph"
     "viz status graph";

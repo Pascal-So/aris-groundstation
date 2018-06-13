@@ -77,7 +77,6 @@ function PlaybackController(database){
                 if(start_time !== last_requested_data_time){
                     return [];
                 }else{
-                    //mergeData(res)
                     console.log(`Received data, requested starttime is ${start_time}.`);
                     if(start_time === last_requested_data_time){
                         // this is needed because otherwise, playback would never resume if the client

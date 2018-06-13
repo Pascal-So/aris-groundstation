@@ -145,11 +145,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 
             if(this.followTarget){
                 if(targetOld === undefined){
-
                     targetOld = scope.target.clone();
-                    console.log(targetOld);
                 }
-                
 
                 offset.sub( targetOld );
 

@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import OrbitControls from './OrbitControls.js';
 import RocketPartModels from './models/rocket-part-models.js';
-const Stats = require('./stats.js');
 
 function RocketViz(element){
   
@@ -16,10 +15,7 @@ function RocketViz(element){
   var rocket;
   var controls;
   var trajectory_line;
-  var stats;
   var firstquat = -1;
-
-  const USE_STATS = false;
 
   const MAX_TRAIL_POINTS = 10000;
   var current_trail_points = 0;
@@ -68,9 +64,6 @@ function RocketViz(element){
       firstquat.inverse();
     }
     quat.multiply(firstquat);
-    //quat.multiply(new THREE.Quaternion(0, 0, -0.7071, 0.7071));
-    //quat.premultiply(new THREE.Quaternion(0, 1, 0, 0));
-    //quat.multiply(new THREE.Quaternion(0.7071, 0, 0, 0.7071));
     rocket.quaternion.set(quat.x, quat.y, quat.z, quat.w);
 
     rocket.position.set(latest.pos.x, latest.pos.y, latest.pos.z);
@@ -115,10 +108,8 @@ function RocketViz(element){
   this.render = () => {
     requestAnimationFrame(this.render);
 
-    if(USE_STATS) stats.begin();
     controls.update();
     renderer.render( scene, camera );
-    if(USE_STATS) stats.end();
   }
 
   //////////// private methods
@@ -129,9 +120,6 @@ function RocketViz(element){
 
     const width = scope.element.clientWidth;
     const height = scope.element.clientHeight;
-
-    console.log(width, 'clientWidth');
-    console.log(height, 'clientHeight');
 
     camera = new THREE.PerspectiveCamera( 70, width / height, 0.01, 100000 );
     camera.position.set(cameraOffset.x, cameraOffset.y, cameraOffset.z);
@@ -156,7 +144,6 @@ function RocketViz(element){
     rocket = new THREE.Group();
     loadModels(rocket);
     rocket.scale.multiplyScalar(0.1);
-    //rocket.scale.set(0.3,0.1,0.1);
     scene.add(rocket);
 
     // add light
@@ -167,7 +154,7 @@ function RocketViz(element){
     scene.add(light);
 
     // add grid
-    var gridsize = 100;
+    var gridsize = 400;
     var gridHelper = new THREE.GridHelper( gridsize*10, gridsize, 0x888888, 0x444444 );
     scene.add( gridHelper );
 
@@ -185,13 +172,6 @@ function RocketViz(element){
     controls.target = rocket.position;
     controls.followTarget = true;
     
-    if(USE_STATS){
-      // add stats
-      stats = new Stats.Stats();
-      stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-      scope.element.appendChild( stats.dom );
-    }
-
     window.addEventListener( 'resize', onWindowResize, false );
 
     scope.element.appendChild( renderer.domElement );

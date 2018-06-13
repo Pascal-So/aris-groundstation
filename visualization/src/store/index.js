@@ -11,12 +11,14 @@ export default new Vuex.Store({
         events: [
             // {
             //     id: 10,
-            //     params: [3, 1],
+            //     param1: 3,
+            //     param2: 1,
             //     time: 200,
             // },
             // {
             //     id: 10,
-            //     params: [5, 3],
+            //     param1: 5
+            //     param2: 3,
             //     time: 2350,
             // },
         ],
@@ -92,6 +94,7 @@ export default new Vuex.Store({
                 const append_events = new_events.filter(frame => {
                     return frame.time > state.data[state.data.length - 1].time;
                 });
+
                 state.data = state.data.concat(append_data);
                 state.events = state.events.concat(append_events);
             }else{
