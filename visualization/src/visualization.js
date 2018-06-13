@@ -154,8 +154,9 @@ function RocketViz(element){
     scene.add(light);
 
     // add grid
-    var gridsize = 400;
-    var gridHelper = new THREE.GridHelper( gridsize*10, gridsize, 0x888888, 0x444444 );
+    const grid_diameter = 5000;
+    const grid_lines_amount = 300;
+    var gridHelper = new THREE.GridHelper( grid_diameter, grid_lines_amount, 0x888888, 0x444444 );
     scene.add( gridHelper );
 
     // add trajectory
