@@ -150,7 +150,7 @@ def main():
 
         xbee_listen(data_receive_callback)
 
-        database_name = datetime.now().strftime("flight-%Y-%m-%d-%H-%M-%S")
+        database_name = datetime.utcnow().strftime("flight-%Y-%m-%d-%H-%M-%S")
         print('Creating InfluxDB database', database_name)
         ifdb_connect(database_name)
 

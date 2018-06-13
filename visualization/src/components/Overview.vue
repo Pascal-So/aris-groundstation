@@ -2,7 +2,7 @@
   <div id="overview">
     <div class="infoblock">
       <h3>Flight:</h3>
-      <h2>{{ database }}</h2><br>
+      <h2>{{ prettyFlightName(database) }}</h2><br>
       <router-link :to="{name: 'FlightSelection'}" exact-active-class="menu-entry-active">Other Flights</router-link>
     </div>
 

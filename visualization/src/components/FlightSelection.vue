@@ -5,7 +5,7 @@
     <p v-if="status == 'error'">Network error. pls fix then reload.</p>
     <ul v-if="status == 'ok'">
       <li v-for="flight in flights" class="flight">
-        <router-link :to="{name: 'Overview', params: {database: flight} }">{{ flight }}</router-link>
+        <router-link :to="{name: 'Overview', params: {database: flight} }">{{ prettyFlightName(flight) }}</router-link>
       </li>
     </ul>
   </div>
