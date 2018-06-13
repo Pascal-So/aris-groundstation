@@ -12,7 +12,7 @@ export default new Vuex.Store({
             // {
             //     id: 10,
             //     params: [3, 1],
-            //     time: 1200,
+            //     time: 200,
             // },
             // {
             //     id: 10,

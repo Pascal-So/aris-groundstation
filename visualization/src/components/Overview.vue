@@ -1,11 +1,9 @@
 <template>
   <div id="overview">
-    <div class="flexrow">
-      <div class="infoblock">
-        <h3>Flight:</h3>
-        <h2>{{ database }}</h2><br>
-        <router-link :to="{name: 'FlightSelection'}" exact-active-class="menu-entry-active">Other Flights</router-link>
-      </div>
+    <div class="infoblock">
+      <h3>Flight:</h3>
+      <h2>{{ database }}</h2><br>
+      <router-link :to="{name: 'FlightSelection'}" exact-active-class="menu-entry-active">Other Flights</router-link>
     </div>
 
     <div class="playback-fixed">
@@ -109,12 +107,6 @@ a:visited{
 .area-status { grid-area: status; }
 .area-graph { grid-area: graph; }
 
-.flexrow{
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
 .panel{
   border: 3px solid #5C5C5C;
   box-sizing: border-box;
@@ -123,7 +115,6 @@ a:visited{
   border-radius: 3px;
   position: relative;
   box-shadow: 4px 4px rgba(0,0,0,0.3);
-  /*height: 630px;*/
 }
 
 .scrollpanel {
@@ -209,10 +200,6 @@ a:visited{
 }
 
 @media(max-width: 530px){
-  .flexrow{
-    flex-direction: column;
-  }
-
   .infoblock h2{
     font-size: 20px;
   }

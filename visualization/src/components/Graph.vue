@@ -74,8 +74,6 @@ export default {
             },
             ticks: {
               fontColor: tickColor,
-              suggestedMin: 0,
-              suggestedMax: 1
             }
           }]
         },

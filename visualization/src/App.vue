@@ -5,7 +5,8 @@
           <img src="./assets/arislogo.png" width="140">
       </header>
 
-      <a href="http://localhost:5000" class="menu-entry">RF&nbsp;Interface</a>
+      <a v-if="running_on_groundstation" href="http://localhost:5000" class="menu-entry">RF&nbsp;Interface</a>
+      <a :href="grafanaLink" class="menu-entry">Grafana</a>
       <a href="https://aris-space.ch" class="menu-entry">ARIS&nbsp;homepage</a>
     </div>
     <div class="main">
@@ -17,6 +18,22 @@
 <script>
 export default {
   name: 'App',
+  data () {
+    return {
+        running_on_groundstation: true,
+    };
+  },
+  mounted () {
+    // we prefer false positives over false negatives here.
+    if(window.location.hostname === "aris.pascalsommer.ch"){
+        this.running_on_groundstation = false;
+    }
+  },
+  computed: {
+    grafanaLink () {
+        return `http://${window.location.hostname}:3000`;
+    },
+  },
 }
 </script>
 
