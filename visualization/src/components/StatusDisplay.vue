@@ -62,15 +62,15 @@ export default {
 
       const frame = data[data.length - 1];
 
-      this.status.pl_on = 1; //frame.status.pl_on; // || this.status.pl_on;
-      this.status.pl_alive = 1; //frame.status.pl_alive; // || this.status.pl_alive;
-      this.status.wifi_status = 0; //frame.status.wifi_status; // || this.status.wifi_status;
-      this.status.sensor_status = frame.status.sensor_status; // || this.status.sensor_status;
-      this.status.sd_status = frame.status.sd_status; // || this.status.sd_status;
-      this.status.control_status = frame.status.control_status; // || this.status.control_status;
+      this.status.pl_on = frame.status.pl_on;
+      this.status.pl_alive = frame.status.pl_alive;
+      this.status.wifi_status = frame.status.wifi_status;
+      this.status.sensor_status = frame.status.sensor_status;
+      this.status.sd_status = frame.status.sd_status;
+      this.status.control_status = frame.status.control_status;
 
-      this.gps.lat = frame.gps1.lat; // || this.gps.lat;
-      this.gps.long = frame.gps1.long; // || this.gps.long;
+      this.gps.lat = frame.gps1.lat;
+      this.gps.long = frame.gps1.long;
     },
     reset () {
       this.status = null_status;

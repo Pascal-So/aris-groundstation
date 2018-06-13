@@ -9,6 +9,4 @@ COPY . .
 
 EXPOSE 5000
 
-RUN export FLASK_ENV=development
-
 CMD python rf_interface.py

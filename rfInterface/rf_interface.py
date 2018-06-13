@@ -106,13 +106,14 @@ def parseMessage(bytestream):
         field = sensor_info['fields'][i]
         fields[field] = decoded_data[i]
 
-    # timestamp_ns = str(timestamp_ms) + '000000'
-    # print('using timestamp: ', timestamp_ns, flush=True)
+    # the python influxdb client should work with just passing an int and setting the
+    # time_precision, but that didn't work so here's a horrible hack :)
     damn_us = (timestamp_ms % 1000) * 1000
     damn_secs = (timestamp_ms // 1000) % 60
     damn_mins = (timestamp_ms // 60000) % 60
     damn_hours = (timestamp_ms // 3600000) % 24
-    str_timestamp = datetime(1970,1,1, hour=damn_hours, minute=damn_mins, second=damn_secs, microsecond=damn_us).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+    str_timestamp = datetime(1970,1,1, hour=damn_hours, minute=damn_mins, second=damn_secs, microsecond=damn_us) \
+        .strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
     return {
         "measurement": sensor_info['measurement'],
@@ -120,6 +121,7 @@ def parseMessage(bytestream):
         "fields": fields,
     }
 
+# extend this list if you want to use more xbee modules.
 known_modules = [
     b'\x00\x13\xa2\x00\x41\x74\xc3\xe0',
     b'\x00\x13\xa2\x00\x41\x74\xc3\xe4',

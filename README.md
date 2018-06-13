@@ -5,7 +5,6 @@ Visualization/data handling/storage solutions for ARIS.
 This is in development so don't count on things staying where they are, stuff might move around quite a lot in here.
 
 ## Usage
-
 First make sure, docker and docker-compose are installed. Check the [official Docker website](https://docs.docker.com/install/) for that.
 
 ```bash
@@ -26,10 +25,16 @@ The flight data is received from the usb device specified in the `docker-compose
 ## Troubleshooting
 
 ### xbee module
-If you can't connect to the module, check if the baud rate in `rfInterface/xbee.py` is correct.
+If you can't connect to the module, check if the baud rate in `rfInterface/xbee.py` and the usb device in `docker-compose.yml` are correct. On most systems, you can check the usb port the module is connected to with `ls /dev/ttyUSB*`.
+
+If your module gets rejected, add the 64bit address to the `known_modules` list in `rfInterface/rf_interface.py`.
 
 ### Streaming data to Server
 You need to be connected to the vpn network.
+
+### InfluxDB
+InfluxDB tends to spam the output if it was killed rather than shut down properly, last time the docker-compose service was running. If this happens, just shut use `docker-compose down` and `docker-compose up` again. `docker-compose restart` doesn't seem to fix it..
+
 
 ## Containers
 
@@ -48,4 +53,4 @@ NodeJS server accepting requests for flight data on port 8080, fetching that dat
 ### visualization
 VueJS app visualizing the flight data with ThreeJS and ChartJS. The app can be run standalone with `npm run dev` in the `visualization` directory. To run the app with docker-compose, the image has to be rebuilt after every code change, which takes a while. The compiled app is then served with Apache.
 
-![user interface ideas](ArisUI.png)
+![user interface](ArisUI.png)
