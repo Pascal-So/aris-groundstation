@@ -9,8 +9,8 @@ Barometer1      3       'bar1'       float32  float32  float32                  
 Barometer2      4       'bar2'       float32  float32  float32
 Magnetometer    5       'mag'        float32  float32  float32
 Climate         6       'cli'        float32  float32  float32                           // druck (pascal)  temp (C°)  humid (%)
-GPS1            7       'gps1'       ?
-GPS2            8       'gps2'       ?
+GPS1            7       'gps1'       21 chars                                            // ddmm.mmmmNdddmm.mmmmW
+GPS2            8       'gps2'       21 chars
 Batteries       9       'bat'        float32                                             // perc %
 
 Status          80      'state'      uint8    uint8    uint8    uint8    uint8    uint8  // pl_on, pl_alive, wifi_status, sensor_status, sd_status, control_status

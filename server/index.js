@@ -130,7 +130,8 @@ function getDataRange(range_limits, start_time = null){
         'rot': ['x', 'y', 'z', 'w'],
         'vel': ['x', 'y', 'z'],
         'acc': ['x', 'y', 'z'],
-        'gps1': ['lat', 'long'],
+        'gps1': ['coords'],
+        'gps2': ['coords'],
         'bar1': ['pa', 'alt', 'temp'],
         'status': ['pl_on', 'pl_alive', 'wifi_status', 'sensor_status', 'sd_status', 'control_status'],
     };

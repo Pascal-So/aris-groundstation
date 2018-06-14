@@ -92,9 +92,9 @@ a:visited{
 
 .grid{
   display: grid;
-  grid-gap: 13px;
+  grid-gap: 8px;
   grid-template-columns: 1.5fr 1fr 1.5fr;
-  grid-template-rows: 1.7fr 1fr;
+  grid-template-rows: 1.55fr 1fr;
   grid-template-areas:
     "viz event  graph"
     "viz status graph";
@@ -111,7 +111,6 @@ a:visited{
   border: 3px solid #5C5C5C;
   box-sizing: border-box;
   padding: 0;
-  margin-bottom: 5px;
   border-radius: 3px;
   position: relative;
   box-shadow: 4px 4px rgba(0,0,0,0.3);

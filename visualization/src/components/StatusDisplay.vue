@@ -3,9 +3,14 @@
     <h3>Status</h3>
     <table style="width:100%">
       <tr>
-        <td>Coordinates</td>
-        <td align="right">{{ gpsString }}</td>
+        <td>GPS 1</td>
+        <td align="right" v-html="gpsFormat(gps1)"></td>
       </tr>
+      <tr>
+        <td>GPS 2</td>
+        <td align="right" v-html="gpsFormat(gps2)"></td>
+      </tr>
+
       <br>
       <tr v-for="key in Object.keys(status)">
         <td>{{ statusName(key) }}</td>
@@ -28,35 +33,41 @@ const null_status = {
   control_status: null,
 };
 
-const null_gps = {
-  lat: null,
-  long: null,
-};
-
 export default {
   name: 'StatusDisplay',
   data () {
     return {
       status: null_status,
-      gps: null_gps,
+      gps1: null,
+      gps2: null,
     };
   },
   mounted () {
     EventBus.$on('new-data', this.newData);
     EventBus.$on('reset-views', this.reset);
   },
-  computed: {
-    gpsString() {
-      if(this.gps.lat === null || this.gps.long === null){
+  methods: {
+    gpsFormat(coords) {
+      if(coords === null){
         return '??';
       }
 
-      const ns = this.gps.lat >= 0 ? `${this.gps.lat}N` : `${-this.gps.lat}S`;
-      const ew = this.gps.long >= 0 ? `${this.gps.long}E` : `${-this.gps.long}W`;
-      return `${ns}, ${ew}`;
+      if(coords.length != 21){
+        // unknown format. don't bother trying to format it.
+        return coords;
+      }
+
+      // GPS coords format received from the rocket:
+      // ddmm.mmmmNdddmm.mmmmW
+      // (according to Raphael)
+
+      const deg_lat = coords.substr(0,2);
+      const rest_lat = coords.substr(2,8);
+      const deg_long = coords.substr(10,3);
+      const rest_long = coords.substr(13,8);
+
+      return `${deg_lat}°${rest_lat},&nbsp;${deg_long}°${rest_long}`;
     },
-  },
-  methods: {
     newData (data) {
       if(data.length === 0) return;
 
@@ -69,8 +80,8 @@ export default {
       this.status.sd_status = frame.status.sd_status;
       this.status.control_status = frame.status.control_status;
 
-      this.gps.lat = frame.gps1.lat;
-      this.gps.long = frame.gps1.long;
+      this.gps1 = frame.gps1;
+      this.gps1 = frame.gps2;
     },
     reset () {
       this.status = null_status;

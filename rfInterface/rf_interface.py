@@ -49,13 +49,14 @@ sensor_id_table = {
     },
     7: {
         "measurement": 'gps1',
-        "encoding": '<ff',
-        "fields": ['lat', 'long'],
+        # the encoding (as well as for gps2) is ignored, and a special case used instead. see below.
+        "encoding": 'ccccccccccccccccccccc',
+        "fields": ['coords'],
     },
     8: {
         "measurement": 'gps2',
-        "encoding": '<ff',
-        "fields": ['lat', 'long'],
+        "encoding": 'ccccccccccccccccccccc',
+        "fields": ['coords'],
     },
     9: {
         "measurement": 'bat',
@@ -97,9 +98,15 @@ def parseMessage(bytestream):
         return []
 
     sensor_info = sensor_id_table[sensor_id]
-    bytestream_length = 4 + 1 + len(sensor_info['encoding']) * 4
-    # ignore further data in the bytestream
-    decoded_data = struct.unpack(sensor_info['encoding'], bytestream[5:bytestream_length])
+    
+    decoded_data = []
+    if sensor_id in [7, 8]:
+        # special case for gps
+        decoded_data = [bytestream[5:5+21].decode('utf-8')]
+    else:
+        # ignore further data if the bytestream is longer than specified in the encoding
+        bytestream_length = 4 + 1 + len(sensor_info['encoding']) * 4
+        decoded_data = struct.unpack(sensor_info['encoding'], bytestream[5:bytestream_length])
 
     fields = {}
     for i in range(len(sensor_info['fields'])):
@@ -127,7 +134,7 @@ known_modules = [
     b'\x00\x13\xa2\x00\x41\x74\xc3\xe4',
     b'\x00\x13\xa2\x00\x41\x5c\xe2\xc7',
     b'\x00\x13\xa2\x00\x41\x5c\xe2\xcb',
-    b'\x00\x13\xA2\x00\x41\x5C\xE2\xB8',
+    b'\x00\x13\xa2\x00\x41\x5c\xe2\xb8',
 ]
 
 def data_receive_callback(xbee_message):
