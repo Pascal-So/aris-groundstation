@@ -4,11 +4,11 @@
     <table style="width:100%">
       <tr>
         <td>GPS 1</td>
-        <td align="right" v-html="gpsFormat(gps1)"></td>
+        <td align="right" v-html="gps_string_1"></td>
       </tr>
       <tr>
         <td>GPS 2</td>
-        <td align="right" v-html="gpsFormat(gps2)"></td>
+        <td align="right" v-html="gps_string_2"></td>
       </tr>
 
       <br>
@@ -45,6 +45,15 @@ export default {
   mounted () {
     EventBus.$on('new-data', this.newData);
     EventBus.$on('reset-views', this.reset);
+  },
+  computed: {
+    // hacky fix. If I call gpsFormat directly in v-html, then coords is apparently undefined...
+    gps_string_1(){
+      return this.gpsFormat(this.gps1);
+    },
+    gps_string_2(){
+      return this.gpsFormat(this.gps2);
+    },
   },
   methods: {
     gpsFormat(coords) {
@@ -85,7 +94,8 @@ export default {
     },
     reset () {
       this.status = null_status;
-      this.gps = null_gps;
+      this.gps1 = null;
+      this.gps2 = null;
     },
     statusString (key) {
       switch(this.status[key]){
