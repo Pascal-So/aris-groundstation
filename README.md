@@ -24,6 +24,9 @@ The flight data is received from the usb device specified in the `docker-compose
 
 ## Troubleshooting
 
+### Containers
+If a container is not running, check if the block in `docker-compose.yml` is commented out.
+
 ### xbee module
 If you can't connect to the module, check if the baud rate in `rfInterface/xbee.py` and the usb device in `docker-compose.yml` are correct. On most systems, you can check the usb port the module is connected to with `ls /dev/ttyUSB*`.
 
@@ -35,7 +38,6 @@ You need to be connected to the vpn network.
 ### Todo
 
 Use bar1.alt in altitude plot
-Print stuf to file python
 
 ### InfluxDB
 InfluxDB tends to spam the output if it was killed rather than shut down properly, last time the docker-compose service was running. If this happens, just shut use `docker-compose down` and `docker-compose up` again. `docker-compose restart` doesn't seem to fix it..

@@ -1,4 +1,0 @@
-switch to preflight state
-switch to ready state
-start avionics test
-start rocket test

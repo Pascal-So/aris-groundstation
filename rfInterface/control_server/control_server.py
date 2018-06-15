@@ -14,32 +14,14 @@ def run_control_server(send_command_callback):
     @app.route('/send-command', methods=['POST'])
     def send_command():
         command = request.form['command']
-        if command == None:
+        argument = request.form['argument']
+        if command == None or argument == None:
             code = 400
-            message = "command missing"
+            message = "command or argument missing"
             return message, code
         
-        send_command_callback(command)
+        send_command_callback(int(command), int(argument))
         return redirect(url_for('index'))
-
-    # @app.route('/start-recording')
-    # def start_recording():
-    #     db_name = request.args.get('db_name')
-
-    #     if recording:
-    #         code = 400
-    #         message = "Already recording"
-    #         return message, code
-
-    #     if db_name == None or db_name == "":
-    #         code = 400
-    #         message = "DB name missing"
-    #         return message, code
-
-    #     recording = True
-
-    #     start_recording_callback(db_name)
-    #     return redirect(url_for('index'))
 
     print('Starting control server', flush=True)
     app.run('0.0.0.0', port = 5000, debug = True, use_reloader=False)

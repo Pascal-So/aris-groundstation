@@ -7,12 +7,45 @@
 </head>
 <body>
 <h1>RF Interface Controls</h1>
-<!-- <p><a href="{{ url_for('send_command') }}">Send Command</a></p>
- -->
+
 <form method="POST" action="{{ url_for('send_command') }}">
-    <label>Command: </label><input type="text" name="command"> <br><br>
+    <label>Command type:</label>
+    <select name="command">
+        <option value="1">Change State (1)</option>
+        <option value="20">Airbrake Control (20)</option>
+    </select>
+
+    <br>
+    <br>
+    <label>Argument:</label>
+    <input type="number" name="argument" min="0" max="4294967295">
+
+    <br><br>
+
     <input type="submit" value="Send Command">
 </form>
+
+<br><br>
+<small>
+    Change state argument:
+    <pre>
+    1:  OFF
+    3:  READY
+    4:  PRE LAUNCH
+    5:  TAKING OFF
+    6:  BRAKING
+    7:  APOGEE
+    8:  DROGUE PARACHUTE
+    9:  MAIN PARACHUTE
+    10: LANDED</pre>
+
+    <br>
+
+    Airbrake Control argument:
+    <pre>
+    0-255: AIRBRAKES POSITION
+    </pre>
+</small>
 
 </body>
 </html>
