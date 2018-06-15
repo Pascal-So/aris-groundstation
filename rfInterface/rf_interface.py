@@ -4,6 +4,7 @@ from datetime import datetime
 
 from ifdb import ifdb_connect, ifdb_write
 from xbee import xbee_listen, xbee_send, xbee_close
+fromm write_files import write_raw_data_to_file, write_decoded_data_to_file
 from control_server.control_server import run_control_server
 
 # some notes:
@@ -82,8 +83,18 @@ sensor_id_table = {
     },
     103: {
         "measurement": 'vel',
+        "encoding": '<ffff',
+        "fields": ['x', 'y', 'z', 'z2'],
+    },
+    104: {
+        "measurement": 'alt',
         "encoding": '<fff',
-        "fields": ['x', 'y', 'z'],
+        "fields": ['alt', 'alt_smoothed', 'vel'],
+    },
+    105: {
+        "measurement": 'brk',
+        "encoding": '<fff',
+        "fields": ['vel', 'alt_smoothed', 'brk'],
     },
 }
 
@@ -95,21 +106,24 @@ def parseMessage(bytestream):
     
     if not sensor_id in sensor_id_table:
         print("Unknown sensor_id:", sensor_id, flush=True)
-        return []
+        return None
 
     sensor_info = sensor_id_table[sensor_id]
     
     decoded_data = []
     if sensor_id in [7, 8]:
         # special case for gps
-        decoded_data = [bytestream[5:5+21].decode('utf-8')]
+        decoded_data = [bytestream[5:].decode('utf-8')]
     else:
-        # ignore further data if the bytestream is longer than specified in the encoding
-        bytestream_length = 4 + 1 + len(sensor_info['encoding']) * 4
-        decoded_data = struct.unpack(sensor_info['encoding'], bytestream[5:bytestream_length])
+        # ignore further data if the bytestream is longer than specified in the encoding.
+        # if bytestream is too short however, just take as many values as we can fit
+        expected_bytestream_length = 4 + 1 + len(sensor_info['encoding']) * 4
+        if len(bytestream) < expected_bytestream_length:
+            expected_bytestream_length = ((len(bytestream) - 5) // 4) * 4 + 5
+        decoded_data = struct.unpack(sensor_info['encoding'], bytestream[5:expected_bytestream_length])
 
     fields = {}
-    for i in range(len(sensor_info['fields'])):
+    for i in range(len(decoded_data)):
         field = sensor_info['fields'][i]
         fields[field] = decoded_data[i]
 
@@ -137,13 +151,21 @@ known_modules = [
     b'\x00\x13\xa2\x00\x41\x5c\xe2\xb8',
 ]
 
+
 def data_receive_callback(xbee_message):
     sender = xbee_message.remote_device.get_64bit_addr()
     if not sender.address in known_modules:
         print("Unknown sender", sender.address, flush=True)
         return
+
     bytestream = xbee_message.data
+    write_raw_data_to_file(bytestream)
+
     data = parseMessage(bytestream)
+    if data == None:
+        return
+    write_decoded_data_to_file(data)
+
     print("Received data:", data, flush=True)
     ifdb_write(data)
 

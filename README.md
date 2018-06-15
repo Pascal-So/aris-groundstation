@@ -32,9 +32,18 @@ If your module gets rejected, add the 64bit address to the `known_modules` list 
 ### Streaming data to Server
 You need to be connected to the vpn network.
 
+### Todo
+
+Use bar1.alt in altitude plot
+Print stuf to file python
+
 ### InfluxDB
 InfluxDB tends to spam the output if it was killed rather than shut down properly, last time the docker-compose service was running. If this happens, just shut use `docker-compose down` and `docker-compose up` again. `docker-compose restart` doesn't seem to fix it..
 
+If InfluxDB is installed on your local machine and the docker container can't start, run this command:
+```
+sudo systemctl stop influxdb.service
+```
 
 ## Containers
 

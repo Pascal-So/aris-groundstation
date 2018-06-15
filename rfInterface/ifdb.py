@@ -8,8 +8,8 @@ ifdb_clients = []
 def ifdb_connect(database_name):
     global ifdb_clients
     ifdb_clients = [
-        # InfluxDBClient('influx', 8086, 'root', 'root', database_name, retries=100),
-        # InfluxDBClient('10.8.0.1', 8086, 'root', 'root', database_name, timeout=1),
+        InfluxDBClient('influx', 8086, 'root', 'root', database_name, retries=100),
+        InfluxDBClient('10.8.0.1', 8086, 'root', 'root', database_name, timeout=1),
     ]
 
     for client in ifdb_clients:

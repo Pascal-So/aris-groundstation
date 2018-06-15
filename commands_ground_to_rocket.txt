@@ -1,0 +1,6 @@
+[8 bit command-id] [32 bit arguments]
+
+command ids:
+
+1   change_state    [arg: target state, encoded the same as for the events]
+20  airbrake_control    [arg: target position of airbrakes 0-255]

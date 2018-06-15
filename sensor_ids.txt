@@ -14,10 +14,12 @@ GPS2            8       'gps2'       21 chars
 Batteries       9       'bat'        float32                                             // perc %
 
 Status          80      'state'      uint8    uint8    uint8    uint8    uint8    uint8  // pl_on, pl_alive, wifi_status, sensor_status, sd_status, control_status
+
 Position        101     'pos'        float32  float32  float32  float32
 Rotation        102     'rot'        float32  float32  float32  float32
-Velocity        103     'vel'        float32  float32  float32
-
+Velocity        103     'vel'        float32  float32  float32  float32
+Altitude        104     'alt'        float32  float32  float32                            // 'alt', 'alt_smoothed', 'vel'
+Brakes          105     'brk'        float32  float32  float32                            // vel, alt, brk
 
 
 messages will be sent from the rocket to the groundstation in this format:

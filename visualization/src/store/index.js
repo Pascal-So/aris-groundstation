@@ -45,7 +45,7 @@ export default new Vuex.Store({
             const altitude = state.data.map(frame => {
                 return {
                     x: frame.time / 1000,
-                    y: frame.pos.z,
+                    y: frame.bar1.alt,
                 };
             });
 
