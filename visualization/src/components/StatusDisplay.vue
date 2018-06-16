@@ -1,17 +1,20 @@
 <template>
   <div id="status-display">
     <h3>Status</h3>
-    <table style="width:100%">
+    <table>
       <tr>
         <td>GPS 1</td>
-        <td align="right" v-html="gps_string_1"></td>
+        <td align="right" v-html="gpsFormat(gps1)"></td>
       </tr>
       <tr>
         <td>GPS 2</td>
-        <td align="right" v-html="gps_string_2"></td>
+        <td align="right" v-html="gpsFormat(gps2)"></td>
       </tr>
+    </table>
 
-      <br>
+    <br>
+
+    <table>
       <tr v-for="key in Object.keys(status)">
         <td>{{ statusName(key) }}</td>
         <td align="right" :style="{color: statusColor(key)}">{{ statusString(key) }}</td>
@@ -45,15 +48,6 @@ export default {
   mounted () {
     EventBus.$on('new-data', this.newData);
     EventBus.$on('reset-views', this.reset);
-  },
-  computed: {
-    // hacky fix. If I call gpsFormat directly in v-html, then coords is apparently undefined...
-    gps_string_1(){
-      return this.gpsFormat(this.gps1);
-    },
-    gps_string_2(){
-      return this.gpsFormat(this.gps2);
-    },
   },
   methods: {
     gpsFormat(coords) {
@@ -89,8 +83,8 @@ export default {
       this.status.sd_status = frame.status.sd_status;
       this.status.control_status = frame.status.control_status;
 
-      this.gps1 = frame.gps1;
-      this.gps1 = frame.gps2;
+      this.gps1 = frame.gps1.coords;
+      this.gps2 = frame.gps2.coords;
     },
     reset () {
       this.status = null_status;
@@ -120,7 +114,7 @@ export default {
     statusName(key) {
       switch(key){
         case 'pl_on':
-          return 'Payload Activated';
+          return 'Payload Active';
         case 'pl_alive':
           return 'Payload Alive';
         case 'wifi_status':
@@ -145,7 +139,8 @@ export default {
 }
 
 table { 
-  border-collapse: collapse; 
+  border-collapse: collapse;
+  width: 100%;
 }
 
 tr {
