@@ -8,6 +8,8 @@ services:
       - ./container-data/database:/var/lib/influxdb
     ports:
       - 8086:8086
+    logging: # This disables logging for InfluxDB (mostly spam). If you need it for some reason, remove this block.
+      driver: none
 
   # receiver: # python script communicating with xbee
   #   build: ./rfInterface/
@@ -37,13 +39,13 @@ services:
     depends_on:
       - "influx"
 
-  visualization: # apache server that servers visualization webapp to client
-                 # Note: this container takes a long time to build, so if you
-                 # don't have time for that, run `npm run dev` instead in the
-                 # `visualization` directory AFTER running `docker-compose up`
-                 # with this service commented out.
-    build: ./visualization
-    depends_on:
-      - "data-provider"
-    ports:
-      - 80:80
+  # visualization: # apache server that servers visualization webapp to client
+  #                # Note: this container takes a long time to build, so if you
+  #                # don't have time for that, run `npm run dev` instead in the
+  #                # `visualization` directory AFTER running `docker-compose up`
+  #                # with this service commented out.
+  #   build: ./visualization
+  #   depends_on:
+  #     - "data-provider"
+  #   ports:
+  #     - 80:80

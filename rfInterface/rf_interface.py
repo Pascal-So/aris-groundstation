@@ -173,8 +173,9 @@ def data_receive_callback(xbee_message):
 # command and argument both as int
 def send_command_callback(command, argument):
     print("send_command called. Command = " + str(command) + ", argument = " + str(argument), flush=True)
-    # todo: check if we can just send argument as 8 bit as well.
-    encoded = struct.pack("<BI", command, argument)
+    if command > 255 or argument > 255 or command < 0 or argument < 0:
+        print("Command or argument outside of range 0-255! Aborting send.", flush=True)
+    encoded = struct.pack("BB", command, argument)
     xbee_send(encoded)
 
 def main():

@@ -22,6 +22,8 @@ Start the docker containers on the groundstation laptop with `sudo docker-compse
 
 The flight data is received from the usb device specified in the `docker-compose.yml` file and stored in an InfluxDB Database with the name `flight-Y-m-d-H-M-S`.
 
+## Todo
+
 ## Troubleshooting
 
 ### Containers
@@ -35,9 +37,6 @@ If your module gets rejected, add the 64bit address to the `known_modules` list 
 ### Streaming data to Server
 You need to be connected to the vpn network.
 
-### Todo
-
-Use bar1.alt in altitude plot
 
 ### InfluxDB
 InfluxDB tends to spam the output if it was killed rather than shut down properly, last time the docker-compose service was running. If this happens, just shut use `docker-compose down` and `docker-compose up` again. `docker-compose restart` doesn't seem to fix it..
@@ -46,6 +45,9 @@ If InfluxDB is installed on your local machine and the docker container can't st
 ```
 sudo systemctl stop influxdb.service
 ```
+
+### General
+Look at the output of `docker-compose up`, where some info will be printed by the various containers while running.
 
 ## Containers
 
