@@ -11,17 +11,19 @@ services:
     logging: # This disables logging for InfluxDB (mostly spam). If you need it for some reason, remove this block.
       driver: none
 
-  # receiver: # python script communicating with xbee
-  #   build: ./rfInterface/
-  #   devices:  # Change the devce to the usb port where the xbee module is connected
-  #     - "/dev/ttyUSB0:/USB"
-  #   depends_on:
-  #     - "influx"
-  #   ports:
-  #     - 5000:5000
-  #   environment:
-  #     - FLASK_ENV=development
-  #   restart: unless-stopped
+  receiver: # python script communicating with xbee
+    build: ./rfInterface/
+    devices:  # Change the devce to the usb port where the xbee module is connected
+      - "/dev/ttyUSB0:/USB"
+    depends_on:
+      - "influx"
+    ports:
+      - 5000:5000
+    environment:
+      - FLASK_ENV=development
+    restart: unless-stopped
+    volumes:
+      - ./container-data/receiver:/var/log/receiver
 
   # grafana: # uncomment this if u need raw data access
   #   image: grafana/grafana
@@ -32,12 +34,12 @@ services:
   #   depends_on:
   #     - "influx"
 
-  data-provider: # node server that gets data from influxdb and sends to browser
-    build: ./server
-    ports:
-      - 8080:8080
-    depends_on:
-      - "influx"
+  # data-provider: # node server that gets data from influxdb and sends to browser
+  #   build: ./server
+  #   ports:
+  #     - 8080:8080
+  #   depends_on:
+  #     - "influx"
 
   # visualization: # apache server that servers visualization webapp to client
   #                # Note: this container takes a long time to build, so if you

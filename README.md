@@ -26,6 +26,11 @@ The flight data is received from the usb device specified in the `docker-compose
 
 ## Troubleshooting
 
+### General
+Look at the output of `docker-compose up`, where some info will be printed by the various containers while running.
+
+If Pascal told you something should be working, but it appears to not be working, make sure you've got the newest version with `git pull` before asking.
+
 ### Containers
 If a container is not running, check if the block in `docker-compose.yml` is commented out.
 
@@ -37,7 +42,6 @@ If your module gets rejected, add the 64bit address to the `known_modules` list 
 ### Streaming data to Server
 You need to be connected to the vpn network.
 
-
 ### InfluxDB
 InfluxDB tends to spam the output if it was killed rather than shut down properly, last time the docker-compose service was running. If this happens, just shut use `docker-compose down` and `docker-compose up` again. `docker-compose restart` doesn't seem to fix it..
 
@@ -46,8 +50,6 @@ If InfluxDB is installed on your local machine and the docker container can't st
 sudo systemctl stop influxdb.service
 ```
 
-### General
-Look at the output of `docker-compose up`, where some info will be printed by the various containers while running.
 
 ## Containers
 
@@ -56,6 +58,8 @@ Runs InfluxDB on port 8086. This port is exposed by docker-compose, so if you ha
 
 ### receiver
 Python script that receives data from the xbee module. Adjust the name of the device in `docker-compose.yml` to match the usb port to which the module is connected. This script then sends the data to InfluxDB. It also hosts a server on port 5000, over which a command can be entered and sent over the xbee via broadcast.
+
+Received flight data gets stored, in addition to InfluxDB, to some text files in the directory `/var/log/receiver`. Make sure a docker volume is mounted to that directory, in order to preserve the logs.
 
 ### grafana
 Default grafana instance, use this to inspect the data in InfluxDB directly. A connection and dashboard needs to be set up on first use, but then the config will be stored in the `container-data` directory and will be available even after the container has been destroyed.

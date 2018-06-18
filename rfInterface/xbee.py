@@ -27,12 +27,19 @@ def xbee_connect():
     print("setting up connection to xbee device", flush=True)
     rf_device = XBeeDevice(PORT, BAUD_RATE)
     rf_device.open()
-    
+
+
 def xbee_listen(callback):
     print("xbee_listen called", flush=True)
     if rf_device is None or not rf_device.is_open():
         xbee_connect()
-    rf_device.add_data_received_callback(callback)
+
+    def xbee_unwrap_message_and_call_callback(xbee_message):
+        sender = xbee_message.remote_device.get_64bit_addr()
+        bytestream = xbee_message.data
+        callback(bytestream, sender.address)
+
+    rf_device.add_data_received_callback(xbee_unwrap_message_and_call_callback)
 
 # https://github.com/digidotcom/python-xbee/tree/master/examples/communication
 def xbee_send(data):
