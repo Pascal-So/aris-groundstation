@@ -5,8 +5,12 @@
           <img src="./assets/arislogo.png" width="140">
       </header>
 
+      <router-link v-if="!running_on_groundstation" class="menu-entry" to="/">Flights</router-link>
+      <router-link v-if="!running_on_groundstation" class="menu-entry" to="/about">About</router-link>
+
       <a v-if="running_on_groundstation" href="http://localhost:5000" class="menu-entry">RF&nbsp;Interface</a>
-      <a :href="grafanaLink" class="menu-entry">Grafana</a>
+      <a v-if="running_on_groundstation" :href="grafanaLink" class="menu-entry">Grafana</a>
+
       <a href="https://aris-space.ch" class="menu-entry">ARIS&nbsp;homepage</a>
     </div>
     <div class="main">
@@ -69,9 +73,11 @@ header{
     color: #dedede;
 }
 
-.menu-entry-active{
-    background-color: #1d1c1f;
+.router-link-exact-active{
+    text-decoration: underline;
+    text-decoration-style: dotted;
 }
+
 
 .h1{
     font-size: 40px;
@@ -80,4 +86,11 @@ header{
 .main{
   padding: 10px 10px 0;
 }
+
+@media(max-width: 440px){
+  .menu-entry{
+    display: block;
+  }
+}
+
 </style>
