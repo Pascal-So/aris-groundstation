@@ -31,6 +31,8 @@ Look at the output of `docker-compose up`, where some info will be printed by th
 
 If Pascal told you something should be working, but it appears to not be working, make sure you've got the newest version with `git pull` before asking.
 
+If you ran `git pull`, but nothing changes, remember to run `docker-compose build` to rebuild the docker images.
+
 ### Containers
 If a container is not running, check if the block in `docker-compose.yml` is commented out.
 

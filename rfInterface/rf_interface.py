@@ -27,7 +27,7 @@ database_name = ""
 def data_receive_callback(message, sender_addr):
     if not sender_addr in known_modules:
         print("Unknown sender", sender_addr, flush=True)
-         return
+        return
 
     parsed_data = parse_message(message)
     write_data_to_file(message, parsed_data, database_name)
@@ -51,7 +51,10 @@ def main():
     try:
         time.sleep(3) # give InfluxDB some time to get its shit together
 
-        xbee_listen(data_receive_callback)
+        try:
+            xbee_listen(data_receive_callback)
+        except Exception as ex:
+            print("Error: Could not set up connection to xbee.", ex, flush=True)
 
         database_name = datetime.utcnow().strftime("flight-%Y-%m-%d-%H-%M-%S")
         print('Creating InfluxDB database', database_name)
