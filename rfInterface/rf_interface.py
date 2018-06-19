@@ -44,7 +44,10 @@ def send_command_callback(command, argument):
     if command > 255 or argument > 255 or command < 0 or argument < 0:
         print("Command or argument outside of range 0-255! Aborting send.", flush=True)
     encoded = struct.pack("BB", command, argument)
-    xbee_send(encoded)
+    try:
+        xbee_send(encoded)
+    except Exception as ex:
+        print("Error: Could not set up connection to xbee.", ex, flush=True)
 
 def main():
     global database_name

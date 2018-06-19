@@ -43,14 +43,13 @@ def xbee_listen(callback):
 
 # https://github.com/digidotcom/python-xbee/tree/master/examples/communication
 def xbee_send(data):
-    print("xbee_send called. sending message 5 times..", flush=True)
+    send_amount = 5
+    print("xbee_send called. sending message " + str(send_amount) + " times..", flush=True)
     if rf_device is None or not rf_device.is_open():
         xbee_connect()
-    rf_device.send_data_broadcast(data)
-    rf_device.send_data_broadcast(data)
-    rf_device.send_data_broadcast(data)
-    rf_device.send_data_broadcast(data)
-    rf_device.send_data_broadcast(data)
+    for _ in range(send_amount):
+        rf_device.send_data_broadcast(data)
+
 
 def xbee_close():
     if rf_device is not None and rf_device.is_open():

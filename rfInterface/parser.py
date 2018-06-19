@@ -103,7 +103,10 @@ def parse_message(bytestream):
     decoded_data = []
     if sensor_id in [7, 8]:
         # special case for gps
-        decoded_data = [bytestream[5:].decode('utf-8')]
+        try:
+            decoded_data = [bytestream[5:].decode('utf-8')]
+        except:
+            decoded_data = ["no fix"]
 
         # According to conversation with Rafael, 18.06.2018, TELL 1 now won't send much data to the
         # ground station, only GPS coordinates. Since the visualization doesn't have much of a

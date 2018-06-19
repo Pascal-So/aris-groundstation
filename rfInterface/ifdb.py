@@ -36,9 +36,8 @@ def ifdb_send_data():
         while not ifdb_data_queue.empty():
             send_data.append(ifdb_data_queue.get())
 
-        print('Sending {0:d} data ponits to InfluxDB'.format(len(send_data)), flush=True)
-
         if len(send_data) > 0:
+            print('Sending {0:d} data ponits to InfluxDB'.format(len(send_data)), flush=True)
             for client in ifdb_clients:
                 try:
                     client.write_points(send_data, time_precision='ms')
