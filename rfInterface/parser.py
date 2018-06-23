@@ -116,7 +116,8 @@ def parse_message(bytestream):
         print("GPS" + str(gps_nr) + ": ", decoded_data[0], flush=True)
     else:
         # ignore further data if the bytestream is longer than specified in the encoding.
-        # if bytestream is too short however, just take as many values as we can fit
+        # If bytestream is too short however, just take as many values as we can fit.
+        # This assumes, that every field in the data is represented by 4 bytes.
         words = len(sensor_info['encoding'])
         expected_bytestream_length = 4 + 1 + words * 4
         if len(bytestream) < expected_bytestream_length:
