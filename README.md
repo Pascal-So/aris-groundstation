@@ -15,10 +15,10 @@ cd aris-groundstation
 mkdir container-data/grafana && sudo chown -R 472 container-data/grafana
 
 # This step might take a while..
-sudo docker-compse build
+sudo docker-compose build
 ```
 
-Start the docker containers on the groundstation laptop with `sudo docker-compse up`. Some data (e.g. flight data) will be stored in the directory container-data.
+Start the docker containers on the groundstation laptop with `sudo docker-compose up`. Some data (e.g. flight data) will be stored in the directory container-data.
 
 The flight data is received from the usb device specified in the `docker-compose.yml` file and stored in an InfluxDB Database with the name `flight-Y-m-d-H-M-S`.
 
@@ -40,6 +40,8 @@ If a container is not running, check if the block in `docker-compose.yml` is com
 If you can't connect to the module, check if the baud rate in `rfInterface/xbee.py` and the usb device in `docker-compose.yml` are correct. On most systems, you can check the usb port the module is connected to with `ls /dev/ttyUSB*`.
 
 If your module gets rejected, add the 64bit address to the `known_modules` list in `rfInterface/rf_interface.py`.
+
+If XCTU can't find the module, sometimes you have to connect the usb cable and start XCTU before plugging in the power to the module...
 
 ### Streaming data to Server
 You need to be connected to the vpn network.
@@ -70,6 +72,6 @@ Default grafana instance, use this to inspect the data in InfluxDB directly. A c
 NodeJS server accepting requests for flight data on port 8080, fetching that data from InfluxDB, and returning it to the browser.
 
 ### visualization
-VueJS app visualizing the flight data with ThreeJS and ChartJS. The app can be run standalone with `npm run dev` in the `visualization` directory. To run the app with docker-compose, the image has to be rebuilt after every code change, which takes a while. The compiled app is then served with Apache.
+VueJS app visualizing the flight data with ThreeJS and ChartJS. The app can be run standalone with `npm run dev` in the `visualization` directory (port 8081). To run the app with docker-compose, the image has to be rebuilt after every code change, which takes a while. The compiled app is then served with Apache.
 
 ![user interface](ArisUI.png)
