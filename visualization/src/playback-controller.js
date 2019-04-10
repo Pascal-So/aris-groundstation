@@ -89,7 +89,8 @@ function PlaybackController(database){
                 }
             })
             .catch(err => {
-                console.log("fetch error:", err);
+                if (err.toString() != "SyntaxError: JSON.parse: unexpected character at line 1 column 1 of the JSON data")
+                    console.log("fetch error:", err);
                 return []; // don't care. viewLoop will automatically retry.
             });
     }
@@ -110,7 +111,7 @@ function PlaybackController(database){
         if(store.state.duration){
             if(new_time < 0 || new_time > store.state.duration){
                 console.log("Tried to jump outside server available flight data. Correcting to nearest available.");
-                
+
                 if(new_time > store.state.duration){
                     new_time = store.state.duration;
                 }else{
@@ -146,8 +147,8 @@ function PlaybackController(database){
         const new_data_start_time = new_data[0].time;
         const range = store.getters.storedDataRange;
 
-        if(range !== null && 
-            new_data_start_time >= range.start && 
+        if(range !== null &&
+            new_data_start_time >= range.start &&
             new_data_start_time <= range.end + Config.data_frame_interval){
             const append_data = new_data.filter(frame => {
                 return frame.time > range.end;
