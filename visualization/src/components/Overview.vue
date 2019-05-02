@@ -14,7 +14,12 @@
 
     <div class="grid">
       <div class="panel area-viz">
-        <Visualization class="fill"/>
+        <Visualization class="fill" v-if="visualization_active"/>
+        <div class="fill" v-if="! visualization_active" style="padding: 50px 20px;">
+          <button @click.prevent="visualization_active = true" style="margin: auto; display: block;">
+            Click here to activate the 3d viz. Note: can be slow depending on hardware.
+          </button>
+        </div>
       </div>
       <div class="panel scrollpanel area-event">
         <Eventlist/>
@@ -55,6 +60,7 @@ export default {
   data () {
     return {
       controller: null,
+      visualization_active: false,
     }
   },
   mounted () {
@@ -171,7 +177,7 @@ a:visited{
   .grid{
     grid-template-columns: 1fr 0.6fr;
     grid-template-rows: 1fr 1fr;
-    grid-template-areas: 
+    grid-template-areas:
         "viz   event "
         "graph status";
     height: 900px;
@@ -189,7 +195,7 @@ a:visited{
   .grid{
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 1fr 0.7fr 1fr;
-    grid-template-areas: 
+    grid-template-areas:
         "graph"
         "event"
         "status"
