@@ -1,7 +1,7 @@
 FROM httpd:2.4
 
 RUN apt-get update && \
-    apt-get install -y apt-transport-https lsb-release curl && \
+    apt-get install -y apt-transport-https lsb-release curl gnupg2 && \
     curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
     echo 'deb https://deb.nodesource.com/node_9.x jessie main' > /etc/apt/sources.list.d/nodesource.list && \
     echo 'deb-src https://deb.nodesource.com/node_9.x jessie main' >> /etc/apt/sources.list.d/nodesource.list
