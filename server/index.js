@@ -27,6 +27,7 @@ function runEventQuery(influx, start_time, end_time){
 
 /**
  * Assumes that `fields` is not empty, and that no measurement is called 'time'.
+ * Assumes that the measurement corresponding to the first entry in `fields` is not empty.
  * @param array fields   [pos: ['x', 'y', 'z'], rot: [...], ...]
  * @return Promise
  */
@@ -43,7 +44,7 @@ function runSensorQueries(influx, fields, start_time, end_time){
             // let's do this like it's good ol' C++
             const n = data[0].length; // amount of rows (points in time)
             var out = [];
-            
+
             for(var i = 0; i < n; ++i){
                 var frame = {};
                 frame['time'] = nanoToMilli(data[0][i].time.getNanoTime());
@@ -89,7 +90,7 @@ function roundToInterval(value, granularity){
 function getRangeLimits(){
     // reference field from reference table is assumed to be recorded often, so the last timestamp on
     // this record is assumed to be the last timestamp overall (or close to). Same for the first.
-    const reference_table = 'pos';
+    const reference_table = 'acc';
     const reference_field = 'x';
 
     const promise_start = influx.query(`SELECT first(${reference_field}) FROM ${reference_table}`);
@@ -126,10 +127,10 @@ function getDataRange(range_limits, start_time = null){
 
     // see files `/sensor_ids.txt` and '/rfInterface/rf_interface.py'
     const sensor_fields = {
+        'acc': ['x', 'y', 'z'],
         'pos': ['x', 'y', 'z'],
         'rot': ['x', 'y', 'z', 'w'],
         'vel': ['x', 'y', 'z'],
-        'acc': ['x', 'y', 'z'],
         'gps1': ['coords'],
         'gps2': ['coords'],
         'bar1': ['pa', 'alt', 'temp'],
@@ -228,7 +229,7 @@ app.get('/get-data', (req, res) => {
 
     const database = req.query.db;
     if(!database || database == ''){
-        console.log(`Request with missing database selection.`);        
+        console.log(`Request with missing database selection.`);
         res.status(400);
         res.send('No database selected.');
         return;
