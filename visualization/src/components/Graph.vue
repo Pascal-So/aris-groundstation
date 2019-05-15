@@ -1,7 +1,9 @@
 <template>
   <div class="graph">
     <h3>{{ title }}</h3>
-    <canvas></canvas>
+    <div class="heigh-limiter">
+      <canvas></canvas>
+    </div>
   </div>
 </template>
 
@@ -87,6 +89,7 @@ export default {
           }
         },
         responsive: true,
+        maintainAspectRatio: false,
         elements: {
           point: {
             radius: 0,
@@ -107,9 +110,14 @@ export default {
 
   h3{
     padding: 0 10px;
+    margin: 5px 0;
   }
 
   .graph{
-    padding: 0 5px;
+    padding: 5px 5px;
+  }
+
+  .heigh-limiter{
+    height: 260px;
   }
 </style>

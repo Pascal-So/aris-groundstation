@@ -12,14 +12,15 @@
       </tr>
     </table>
 
-    <br>
+    <!-- for 2019 we're using the status display only for gps, as the other stuff is not transmitted. -->
+    <!-- <br>
 
     <table>
       <tr v-for="key in Object.keys(status)">
         <td>{{ statusName(key) }}</td>
         <td align="right" :style="{color: statusColor(key)}">{{ statusString(key) }}</td>
       </tr>
-    </table> 
+    </table> -->
   </div>
 </template>
 
@@ -55,33 +56,36 @@ export default {
         return '??';
       }
 
-      if(coords.length != 21){
-        // unknown format. don't bother trying to format it.
-        return coords;
+      if (coords.length == 21 &&
+          coords.charAt(4) == '.' &&
+          coords.charAt(15) == '.') {
+        // 2018 format
+
+        // GPS coords format received from the rocket:
+        // ddmm.mmmmNdddmm.mmmmW
+        // (according to Raphael)
+
+        const deg_lat = coords.substr(0,2);
+        const rest_lat = coords.substr(2,8);
+        const deg_long = coords.substr(10,3);
+        const rest_long = coords.substr(13,8);
+        return `${deg_lat}°${rest_lat},&nbsp;${deg_long}°${rest_long}`;
+      } else {
+        // 2019 or unknown format
+        return coords.replace(/ /g, '&nbsp;');
       }
-
-      // GPS coords format received from the rocket:
-      // ddmm.mmmmNdddmm.mmmmW
-      // (according to Raphael)
-
-      const deg_lat = coords.substr(0,2);
-      const rest_lat = coords.substr(2,8);
-      const deg_long = coords.substr(10,3);
-      const rest_long = coords.substr(13,8);
-
-      return `${deg_lat}°${rest_lat},&nbsp;${deg_long}°${rest_long}`;
     },
     newData (data) {
       if(data.length === 0) return;
 
       const frame = data[data.length - 1];
 
-      this.status.pl_on = frame.status.pl_on;
-      this.status.pl_alive = frame.status.pl_alive;
-      this.status.wifi_status = frame.status.wifi_status;
-      this.status.sensor_status = frame.status.sensor_status;
-      this.status.sd_status = frame.status.sd_status;
-      this.status.control_status = frame.status.control_status;
+      // this.status.pl_on = frame.status.pl_on;
+      // this.status.pl_alive = frame.status.pl_alive;
+      // this.status.wifi_status = frame.status.wifi_status;
+      // this.status.sensor_status = frame.status.sensor_status;
+      // this.status.sd_status = frame.status.sd_status;
+      // this.status.control_status = frame.status.control_status;
 
       this.gps1 = frame.gps1.coords;
       this.gps2 = frame.gps2.coords;
@@ -138,7 +142,7 @@ export default {
   padding: 0 12px;
 }
 
-table { 
+table {
   border-collapse: collapse;
   width: 100%;
 }

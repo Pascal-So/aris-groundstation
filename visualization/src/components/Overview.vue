@@ -13,14 +13,14 @@
     <br>
 
     <div class="grid">
-      <div class="panel area-viz">
+      <!-- <div class="panel area-viz">
         <Visualization class="fill" v-if="visualization_active"/>
         <div class="fill" v-if="! visualization_active" style="padding: 50px 20px;">
           <button @click.prevent="visualization_active = true" style="margin: auto; display: block;">
             Click here to activate the 3d viz. Note: can be slow depending on hardware.
           </button>
         </div>
-      </div>
+      </div> -->
       <div class="panel scrollpanel area-event">
         <Eventlist/>
       </div>
@@ -28,11 +28,15 @@
         <StatusDisplay/>
       </div>
       <div class="panel scrollpanel area-graph">
-        <Graph title="Altitude (barometer)" dataset="altitude"></Graph>
-        <Graph title="Vertical Velocity (IMU)" dataset="velocity_z"></Graph>
-        <Graph title="Acceleration magnitude" dataset="acceleration"></Graph>
+        <Graph title="Altitude (sensor fusion)" dataset="fusion_alt"></Graph>
+        <Graph title="Vertical Velocity (sensor fusion)" dataset="fusion_vel"></Graph>
+        <Graph title="Acceleration magnitude (accelerometer 1)" dataset="acceleration"></Graph>
+        <Graph title="Temperature (barometer 1)" dataset="bar1_temp"></Graph>
+        <br><br>
       </div>
     </div>
+
+    <br>
   </div>
 </template>
 
@@ -99,11 +103,11 @@ a:visited{
 .grid{
   display: grid;
   grid-gap: 8px;
-  grid-template-columns: 1.5fr 1fr 1.5fr;
-  grid-template-rows: 1.55fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 140px;
   grid-template-areas:
-    "viz event  graph"
-    "viz status graph";
+    "graph event "
+    "graph status";
   grid-auto-rows: auto;
   height: 700px;
 }
@@ -176,10 +180,6 @@ a:visited{
 
   .grid{
     grid-template-columns: 1fr 0.6fr;
-    grid-template-rows: 1fr 1fr;
-    grid-template-areas:
-        "viz   event "
-        "graph status";
     height: 900px;
   }
 

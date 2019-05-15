@@ -74,4 +74,6 @@ NodeJS server accepting requests for flight data on port 8080, fetching that dat
 ### visualization
 VueJS app visualizing the flight data with ThreeJS and ChartJS. The app can be run standalone with `npm run dev` in the `visualization` directory (port 8081). To run the app with docker-compose, the image has to be rebuilt after every code change, which takes a while. The compiled app is then served with Apache.
 
+For the 2019 version of the groundstation, the 3d visualization using ThreeJS has been disabled, as we don't have xy or orientation data, the visualization therefore doesn't make any sense. Can be reenabled by uncommenting it in `visualization/sr/components/Overview.vue`.
+
 ![user interface](ArisUI.png)

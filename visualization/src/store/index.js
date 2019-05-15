@@ -42,22 +42,29 @@ export default new Vuex.Store({
             return state.events;
         },
         graphFormattedData: state => {
-            const altitude = state.data.map(frame => {
+            const fusion_alt = state.data.map(frame => {
                 return {
                     x: frame.time / 1000,
-                    y: frame.bar1.alt,
+                    y: frame.fusion.alt,
                 };
             });
 
-            const velocity_z = state.data.map(frame => {
+            const fusion_vel = state.data.map(frame => {
                 return {
                     x: frame.time / 1000,
-                    y: frame.vel.z,
+                    y: frame.fusion.vel,
+                };
+            });
+
+            const bar1_temp = state.data.map(frame => {
+                return {
+                    x: frame.time / 1000,
+                    y: frame.bar1.temp,
                 };
             });
 
             const acceleration = state.data.map(frame => {
-                const sq = frame.acc.x * frame.acc.x + frame.acc.y * frame.acc.y + frame.acc.z * frame.acc.z;
+                const sq = frame.acc1.x * frame.acc1.x + frame.acc1.y * frame.acc1.y + frame.acc1.z * frame.acc1.z;
 
                 return {
                     x: frame.time / 1000,
@@ -66,9 +73,10 @@ export default new Vuex.Store({
             });
 
             return {
-                altitude: altitude,
-                velocity_z: velocity_z,
                 acceleration: acceleration,
+                fusion_vel: fusion_vel,
+                fusion_alt: fusion_alt,
+                bar1_temp: bar1_temp,
             };
         },
     },
@@ -85,8 +93,8 @@ export default new Vuex.Store({
             const new_data_start_time = new_data[0].time;
 
             // vuex does not allow access to getters in mutations..  -.-
-            if(state.data.length != 0 && 
-                new_data_start_time >= state.data[0].time && 
+            if(state.data.length != 0 &&
+                new_data_start_time >= state.data[0].time &&
                 new_data_start_time <= state.data[state.data.length - 1].time + Config.data_frame_interval){
                 const append_data = new_data.filter(frame => {
                     return frame.time > state.data[state.data.length - 1].time;
@@ -100,7 +108,7 @@ export default new Vuex.Store({
             }else{
                 state.data = new_data;
                 state.events = new_events;
-                
+
                 // reset views, e.g. clear trajectory line in 3d viz, because we'd have a jump otherwise
                 EventBus.$emit('reset-views');
             }

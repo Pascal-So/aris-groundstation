@@ -1,16 +1,26 @@
 # This is used in rfInterface/rf_interface.py to decode the messages from the rocket.
 
+messages will be sent from the rocket to the groundstation in this format:
+timestamp (uint32),  sensor_id (uint8),  data (up to 128 bits)
+= up to 168 bits per message
+
 Sensor          id      abbrev.      data format (up to 128 bits)
 
 Event           0       'event'      uint32   uint32   uint32                            // event id    params 1 2 3
-Accelerometer   1       'acc'        float32  float32  float32
-Gyroscope       2       'gyro'       float32  float32  float32
-Barometer1      3       'bar1'       float32  float32  float32                           // druck (pascal)  alt (m)  temp (C°)
-Barometer2      4       'bar2'       float32  float32  float32
+Accelerometer1  1       'acc1'       float32  float32  float32
+Accelerometer2  11      'acc2'       float32  float32  float32
+Gyroscope1      2       'gyro1'      float32  float32  float32
+Gyroscope2      12      'gyro2'      float32  float32  float32
+Barometer1      3       'bar1'       float32  float32                                    // druck (hPa)  temp (C°)
+Barometer2      4       'bar2'       float32  float32
+GPS1            7       'gps1'       int32    int32                                      // lat, lng, jeweils / 10'000'000, dann D.D° Format https://tnp.uservoice.com/knowledgebase/articles/172110-latitude-longitude-formats-and-conversion
+GPS2            8       'gps2'       int32    int32
+Brakes          105     'brk'        float32  float32  float32                           // u (Auslenkung), w0, w1 (integrator states)
+SensorFusion    106     'fusion'     float32  float32                                    // 'alt' (m)  'vel' (m/s)
+
+Unused sensors, left over from 2018:
 Magnetometer    5       'mag'        float32  float32  float32
 Climate         6       'cli'        float32  float32  float32                           // druck (pascal)  temp (C°)  humid (%)
-GPS1            7       'gps1'       21 chars                                            // ddmm.mmmmNdddmm.mmmmW
-GPS2            8       'gps2'       21 chars
 Batteries       9       'bat'        float32                                             // perc %
 
 Status          80      'state'      uint8    uint8    uint8    uint8    uint8    uint8  // pl_on, pl_alive, wifi_status, sensor_status, sd_status, control_status
@@ -19,9 +29,5 @@ Position        101     'pos'        float32  float32  float32  float32
 Rotation        102     'rot'        float32  float32  float32  float32
 Velocity        103     'vel'        float32  float32  float32  float32
 Altitude        104     'alt'        float32  float32  float32                            // 'alt', 'alt_smoothed', 'vel'
-Brakes          105     'brk'        float32  float32  float32                            // vel, alt, brk
 
 
-messages will be sent from the rocket to the groundstation in this format:
-timestamp (uint32),  sensor_id (uint8),  data (up to 128 bits)
-= up to 168 bits per message

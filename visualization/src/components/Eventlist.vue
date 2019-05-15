@@ -30,15 +30,25 @@ export default {
       // see file `/event_ids.txt`
       var text = '';
       const states = {
-        1: 'OFF',
-        3: 'READY',
-        4: 'PRE LAUNCH',
-        5: 'TAKING OFF',
-        6: 'BRAKING',
-        7: 'APOGEE',
-        8: 'DROGUE PARACHUTE',
-        9: 'MAIN PARACHUTE',
-        10: 'LANDED',
+        // 2019 events
+        0: 'READY',
+        1: 'CALIBRATING',
+        2: 'PRELAUNCH',
+        3: 'TAKING OFF',
+        4: 'BRAKING',
+        5: 'APOGEE',
+        6: 'LANDED',
+
+        // 2018 events:
+        // 1: 'OFF',
+        // 3: 'READY',
+        // 4: 'PRE LAUNCH',
+        // 5: 'TAKING OFF',
+        // 6: 'BRAKING',
+        // 7: 'APOGEE',
+        // 8: 'DROGUE PARACHUTE',
+        // 9: 'MAIN PARACHUTE',
+        // 10: 'LANDED',
       };
       switch(id){
         case 10:

@@ -90,7 +90,7 @@ function roundToInterval(value, granularity){
 function getRangeLimits(){
     // reference field from reference table is assumed to be recorded often, so the last timestamp on
     // this record is assumed to be the last timestamp overall (or close to). Same for the first.
-    const reference_table = 'acc';
+    const reference_table = 'acc1';
     const reference_field = 'x';
 
     const promise_start = influx.query(`SELECT first(${reference_field}) FROM ${reference_table}`);
@@ -126,15 +126,15 @@ function getDataRange(range_limits, start_time = null){
     const end_time = range_limits.end;
 
     // see files `/sensor_ids.txt` and '/rfInterface/rf_interface.py'
+    // These are the fields that actually get sent to the client.
     const sensor_fields = {
-        'acc': ['x', 'y', 'z'],
-        'pos': ['x', 'y', 'z'],
-        'rot': ['x', 'y', 'z', 'w'],
-        'vel': ['x', 'y', 'z'],
+        'acc1': ['x', 'y', 'z'],
+        'gyro1': ['x', 'y', 'z'],
+        'bar1': ['hpa', 'temp'],
         'gps1': ['coords'],
         'gps2': ['coords'],
-        'bar1': ['pa', 'alt', 'temp'],
-        'status': ['pl_on', 'pl_alive', 'wifi_status', 'sensor_status', 'sd_status', 'control_status'],
+        'brk': ['u', 'w0', 'w1'],
+        'fusion': ['alt', 'vel'],
     };
 
     const sensors_promise = runSensorQueries(influx, sensor_fields, start_time, end_time);
@@ -161,28 +161,53 @@ function connect(database){
         database: database,
         schema: [
             {
-                measurement: 'pos',
-                fields: xyz,
-                tags: []
-            },
-            {
-                measurement: 'rot',
+                measurement: 'acc1', fields: xyz, tags: []
+            }, {
+                measurement: 'acc2', fields: xyz, tags: []
+            }, {
+                measurement: 'gyro1', fields: xyz, tags: []
+            }, {
+                measurement: 'gyro2', fields: xyz, tags: []
+            }, {
+                measurement: 'bar1',
                 fields: {
-                    x: Influx.FieldType.Float,
-                    y: Influx.FieldType.Float,
-                    z: Influx.FieldType.Float,
-                    w: Influx.FieldType.Float,
+                    hpa: Influx.FieldType.Float,
+                    temp: Influx.FieldType.Float
                 },
                 tags: []
-            },
-            {
-                measurement: 'vel',
-                fields: xyz,
+            }, {
+                measurement: 'bar2',
+                fields: {
+                    hpa: Influx.FieldType.Float,
+                    temp: Influx.FieldType.Float
+                },
                 tags: []
-            },
-            {
-                measurement: 'acc',
-                fields: xyz,
+            }, {
+                measurement: 'gps1',
+                fields: {
+                    coords: Influx.FieldType.String
+                },
+                tags: []
+            }, {
+                measurement: 'gps2',
+                fields: {
+                    coords: Influx.FieldType.String
+                },
+                tags: []
+            }, {
+                measurement: 'brk',
+                fields: {
+                    u: Influx.FieldType.Float,
+                    w0: Influx.FieldType.Float,
+                    w1: Influx.FieldType.Float
+                },
+                tags: []
+            }, {
+                measurement: 'fusion',
+                fields: {
+                    alt: Influx.FieldType.Float,
+                    vel: Influx.FieldType.Float
+                },
                 tags: []
             },
         ],
@@ -265,6 +290,7 @@ app.get('/get-data', (req, res) => {
                 data: send_sensors_data,
                 events: send_events_data,
                 info: {
+                    version: "2019",
                     requested_start: start_data_time,
                     flight_data_duration: range_limits.end - range_limits.start,
                 },
