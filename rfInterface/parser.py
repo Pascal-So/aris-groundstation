@@ -188,18 +188,8 @@ def parse_message(bytestream):
         field = sensor_info['fields'][i]
         fields[field] = decoded_data[i]
 
-    # the python influxdb client should work with just passing an int and setting the
-    # time_precision, but that didn't work so here's a horrible hack :)
-    damn_us = (timestamp_ms % 1000) * 1000
-    damn_secs = (timestamp_ms // 1000) % 60
-    damn_mins = (timestamp_ms // 60000) % 60
-    damn_hours = (timestamp_ms // 3600000) % 24
-    damn_days = (timestamp_ms // (3600000 * 24)) % 30 + 1
-    str_timestamp = datetime(1970,1,day=damn_days, hour=damn_hours, minute=damn_mins, second=damn_secs, microsecond=damn_us) \
-        .strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-
     return {
         "measurement": sensor_info['measurement'],
-        "time": str_timestamp,
+        "time": timestamp_ms,
         "fields": fields,
     }

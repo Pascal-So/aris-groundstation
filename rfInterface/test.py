@@ -1,6 +1,7 @@
 import unittest
 import parser
 import struct
+import ifdb
 
 class TestParser(unittest.TestCase):
 
@@ -21,12 +22,16 @@ class TestParser(unittest.TestCase):
 
         self.assertEqual(parser.parse_message(bstrm), {
             'measurement': 'gps1',
-            'time': '1970-01-01 00:00:12.345',
+            'time': 12345,
             'fields': {
                 'coords': '45°46\'52.00"N, 108°30\'14.00"W'
             }
         })
 
+class TestIfdbStuff(unittest.TestCase):
+
+    def test_timestamp_converter(self):
+        self.assertEqual(ifdb.timestamp_ms_to_string_time(12345), '1970-01-01 00:00:12.345')
 
 if __name__ == '__main__':
     unittest.main()

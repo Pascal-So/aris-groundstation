@@ -1,3 +1,4 @@
+from datetime import datetime
 from influxdb import InfluxDBClient
 from queue import Queue
 from threading import Thread
@@ -23,7 +24,19 @@ def ifdb_connect(database_name):
 
 ifdb_data_queue = Queue()
 
+def timestamp_ms_to_string_time(timestamp_ms):
+    # the python influxdb client should work with just passing an int and setting the
+    # time_precision, but that didn't work so here's a horrible hack :)
+    damn_us = (timestamp_ms % 1000) * 1000
+    damn_secs = (timestamp_ms // 1000) % 60
+    damn_mins = (timestamp_ms // 60000) % 60
+    damn_hours = (timestamp_ms // 3600000) % 24
+    damn_days = timestamp_ms // (3600000 * 24) + 1
+    return datetime(1970,1,day=damn_days, hour=damn_hours, minute=damn_mins, second=damn_secs, microsecond=damn_us) \
+        .strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+
 def ifdb_write(data):
+    data.time = timestamp_ms_to_string_time(data.time)
     ifdb_data_queue.put(data)
 
 # Running in a separate thread, because influxdb.InfluxDBClient.write_points blocks.
