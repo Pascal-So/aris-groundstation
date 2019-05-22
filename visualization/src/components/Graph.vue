@@ -46,7 +46,7 @@ export default {
       type: 'line',
       data: {
         datasets: [{
-          data: this.allData,
+          data: [],
           borderColor: 'rgb(141, 185, 224)',
           lineTension: 0,
           fill: true,

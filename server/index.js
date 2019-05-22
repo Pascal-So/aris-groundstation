@@ -1,15 +1,14 @@
+const Config = require('./config');
 const Influx = require('influx');
 const express = require('express');
 const cors = require('cors');
-
-const DATA_FRAME_INTERVAL = 50 // ms;
 
 // ################## IFDB magic functions ######################
 
 // construct InfluxDB query string
 function selectSensorString(fields, measurement, start_time, end_time){
     const str = `SELECT ${fields.map(name => `last(${name}) as ${name}`).join(', ')} FROM ${measurement} `
-        + `WHERE time >= ${start_time} and time <= ${end_time} GROUP BY time(${DATA_FRAME_INTERVAL}ms) fill(previous) limit ${send_max_frames}`;
+        + `WHERE time >= ${start_time} and time <= ${end_time} GROUP BY time(${Config.data_time_resolution}ms) fill(previous) limit ${Config.send_max_frames}`;
     return str;
 }
 
@@ -87,7 +86,7 @@ function roundToInterval(value, granularity){
  *
  * return Object  {start, end}
  */
-function getRangeLimits(){
+function getRangeLimits(influx){
     // reference field from reference table is assumed to be recorded often, so the last timestamp on
     // this record is assumed to be the last timestamp overall (or close to). Same for the first.
     const reference_table = 'acc1';
@@ -102,8 +101,8 @@ function getRangeLimits(){
                 return Promise.reject(new Error('No data in db'));
             }
 
-            const start_time = roundToInterval(nanoToMilli(promise_results[0][0].time.getNanoTime()), DATA_FRAME_INTERVAL);
-            const end_time = roundToInterval(nanoToMilli(promise_results[1][0].time.getNanoTime()), DATA_FRAME_INTERVAL);
+            const start_time = roundToInterval(nanoToMilli(promise_results[0][0].time.getNanoTime()), Config.data_time_resolution);
+            const end_time = roundToInterval(nanoToMilli(promise_results[1][0].time.getNanoTime()), Config.data_time_resolution);
             return {start: start_time, end: end_time};
         });
 }
@@ -115,7 +114,7 @@ function getRangeLimits(){
  * @param int start_time
  * @return Promise {'sensors', 'events'}
  */
-function getDataRange(range_limits, start_time = null){
+function getDataRange(influx, range_limits, start_time = null){
     if(typeof start_time !== "number"){
         start_time = null;
     }
@@ -156,8 +155,8 @@ function connect(database){
         z: Influx.FieldType.Float,
     };
 
-    influx = new Influx.InfluxDB({
-        host: INFLUX_HOST,
+    var influx = new Influx.InfluxDB({
+        host: Config.influx_host,
         database: database,
         schema: [
             {
@@ -212,18 +211,10 @@ function connect(database){
             },
         ],
     });
+
+    return influx;
 }
 
-var influx = null;
-
-
-// ##################### Server config #####################
-const PORT = 8080;
-const containerized = true;
-const HOST = containerized ? 'data-provider' : '0.0.0.0';
-const INFLUX_HOST = containerized ? 'influx' : 'localhost';
-
-const send_max_frames = 400;
 
 
 // ############### hanle HTTP requests ##########################
@@ -247,7 +238,6 @@ const send_max_frames = 400;
 }
 */
 
-
 const app = express();
 app.use(cors());
 app.get('/get-data', (req, res) => {
@@ -260,7 +250,7 @@ app.get('/get-data', (req, res) => {
         return;
     }
 
-    connect(database);
+    var influx = connect(database);
 
     // inclusive start of requested time interval, given in ms since recording start
     var start_data_time = parseInt(req.query.start);
@@ -271,10 +261,10 @@ app.get('/get-data', (req, res) => {
     console.log(`Received request for data form '${start_data_time}', database '${database}'.`);
 
     var range_limits = null;
-    getRangeLimits()
+    getRangeLimits(influx)
         .then(limits => {
             range_limits = limits;
-            return getDataRange(range_limits, start_data_time + range_limits.start);
+            return getDataRange(influx, range_limits, start_data_time + range_limits.start);
         })
         .then(response_data => {
             const adjust_start_lambda = (frame) => {
@@ -282,7 +272,7 @@ app.get('/get-data', (req, res) => {
                 return frame;
             };
 
-            const send_sensors_data = response_data.sensors.slice(0, send_max_frames).map(adjust_start_lambda);
+            const send_sensors_data = response_data.sensors.slice(0, Config.send_max_frames).map(adjust_start_lambda);
             const send_events_data = response_data.events.map(adjust_start_lambda);
 
             console.log(`Sending ${send_sensors_data.length} frames of sensor data, and ${send_events_data.length} events.`);
@@ -303,8 +293,7 @@ app.get('/get-data', (req, res) => {
 });
 
 app.get('/get-databases', (req, res) => {
-    connect('dummy');
-    influx.getDatabaseNames()
+    connect('dummy').getDatabaseNames()
         .then(databases => {
             res.json({databases: databases.filter(db => db != '_internal')});
         })
@@ -313,5 +302,5 @@ app.get('/get-databases', (req, res) => {
         });
 });
 
-app.listen(PORT, HOST);
-console.log(`Running on http://${HOST}:${PORT}`);
+app.listen(Config.port, Config.host);
+console.log(`Running on http://${Config.host}:${Config.port}`);

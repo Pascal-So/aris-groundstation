@@ -5,7 +5,7 @@ Visualization/data handling/storage solutions for ARIS.
 This is in development so don't count on things staying where they are, stuff might move around quite a lot in here.
 
 ## Usage
-First make sure, docker and docker-compose are installed. Check the [official Docker website](https://docs.docker.com/install/) for that.
+First make sure that docker and docker-compose are installed and that the docker service is running. Check the [official Docker website](https://docs.docker.com/install/) for that.
 
 ```bash
 git clone https://github.com/Pascal-So/aris-groundstation.git
@@ -21,6 +21,8 @@ sudo docker-compose build
 Start the docker containers on the groundstation laptop with `sudo docker-compose up`. Some data (e.g. flight data) will be stored in the directory container-data.
 
 The flight data is received from the usb device specified in the `docker-compose.yml` file and stored in an InfluxDB Database with the name `flight-Y-m-d-H-M-S`.
+
+Some of the behaviour of the frontend / server can be adjusted in `visualization/src/config.js` and `server/config.js`.
 
 ## Todo
 

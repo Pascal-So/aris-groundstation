@@ -23,6 +23,11 @@ export default new Vuex.Store({
             // },
         ],
         duration: null,
+
+        // note: this copy of the playback_time is only used for filtering the
+        // graph display. the one true source of truth for the playback time is
+        // still playback-controller.js.
+        playback_time: 0,
     },
     getters: {
         storedDataRange: state => {
@@ -42,33 +47,35 @@ export default new Vuex.Store({
             return state.events;
         },
         graphFormattedData: state => {
-            const fusion_alt = state.data.map(frame => {
+            const filtered = state.data.filter(frame => frame.time <= state.playback_time);
+
+            const fusion_alt = filtered.map(frame => {
                 return {
                     x: frame.time / 1000,
                     y: frame.fusion.alt,
                 };
             });
 
-            const fusion_vel = state.data.map(frame => {
+            const fusion_vel = filtered.map(frame => {
                 return {
                     x: frame.time / 1000,
                     y: frame.fusion.vel,
                 };
             });
 
-            const bar1_temp = state.data.map(frame => {
+            const bar1_temp = filtered.map(frame => {
                 return {
                     x: frame.time / 1000,
                     y: frame.bar1.temp,
                 };
             });
 
-            const acceleration = state.data.map(frame => {
+            const acceleration = filtered.map(frame => {
                 const sq = frame.acc1.x * frame.acc1.x + frame.acc1.y * frame.acc1.y + frame.acc1.z * frame.acc1.z;
 
                 return {
                     x: frame.time / 1000,
-                    y: Math.sqrt(sq),
+                    y: (frame.acc1.x === null) ? null : Math.sqrt(sq),
                 };
             });
 
@@ -95,7 +102,7 @@ export default new Vuex.Store({
             // vuex does not allow access to getters in mutations..  -.-
             if(state.data.length != 0 &&
                 new_data_start_time >= state.data[0].time &&
-                new_data_start_time <= state.data[state.data.length - 1].time + Config.data_frame_interval){
+                new_data_start_time <= state.data[state.data.length - 1].time + Config.data_time_resolution){
                 const append_data = new_data.filter(frame => {
                     return frame.time > state.data[state.data.length - 1].time;
                 });
@@ -112,6 +119,9 @@ export default new Vuex.Store({
                 // reset views, e.g. clear trajectory line in 3d viz, because we'd have a jump otherwise
                 EventBus.$emit('reset-views');
             }
+        },
+        setPlaybackTime (state, new_time) {
+            state.playback_time = new_time;
         },
         clear (state) {
             state.data = [];

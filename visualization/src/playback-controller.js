@@ -11,7 +11,7 @@ function PlaybackController(database){
 
     var viewLoop_timeout_object; // storing the timeout that then calls the next viewLoop iteration
 
-    const view_update_interval = Config.data_frame_interval * Config.data_frames_per_view_update;
+    const view_update_interval = Config.data_time_resolution * Config.data_frames_per_view_update;
 
     this.destroy = () => {
         destroyListeners();
@@ -53,6 +53,7 @@ function PlaybackController(database){
             EventBus.$emit('new-data', show_data);
 
             playback_time = Math.max(playback_time, new_playback_time);
+            store.commit('setPlaybackTime', playback_time);
         }
 
         if(playing){
@@ -121,6 +122,7 @@ function PlaybackController(database){
         }
 
         playback_time = new_time;
+        store.commit('setPlaybackTime', playback_time);
         viewLoop(); // don't wait for next loop iteration
     }
 
@@ -136,37 +138,6 @@ function PlaybackController(database){
         EventBus.$off('play', playEventHandler);
     }
 
-    /*const mergeData = res => {
-        flight_data_duration = res.info.flight_data_duration;
-        const new_data = res.data;
-
-        if(new_data.length == 0){
-            return;
-        }
-
-        const new_data_start_time = new_data[0].time;
-        const range = store.getters.storedDataRange;
-
-        if(range !== null &&
-            new_data_start_time >= range.start &&
-            new_data_start_time <= range.end + Config.data_frame_interval){
-            const append_data = new_data.filter(frame => {
-                return frame.time > range.end;
-            });
-            stored_data = stored_data.concat(append_data);
-        }else{
-            stored_data = new_data;
-            playback_time = new_data_start_time;
-            // reset views, e.g. clear trajectory line in 3d viz, because we'd have a jump otherwise
-            EventBus.$emit('reset-views');
-        }
-
-        EventBus.$emit('data-info', {
-            flight_data_duration: flight_data_duration,
-            stored_data_range: store.getters.storedDataRange,
-        });
-    }*/
-
     const init = () => {
         playing = false;
         playback_time = null;
@@ -176,6 +147,7 @@ function PlaybackController(database){
             .then(() => {
                 const range = store.getters.storedDataRange;
                 playback_time = range ? range.start : store.state.duration;
+                store.commit('setPlaybackTime', playback_time);
                 playing = true;
 
                 if(store.state.duration){
@@ -183,7 +155,6 @@ function PlaybackController(database){
                 }
 
                 viewLoop();
-                //window.setTimeout(() => {playing = false; console.log("stopping playback")}, 500);
             });
 
         setupListeners();
