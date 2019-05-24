@@ -36,7 +36,7 @@ def timestamp_ms_to_string_time(timestamp_ms):
         .strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
 def ifdb_write(data):
-    data.time = timestamp_ms_to_string_time(data.time)
+    data["time"] = timestamp_ms_to_string_time(data["time"])
     ifdb_data_queue.put(data)
 
 # Running in a separate thread, because influxdb.InfluxDBClient.write_points blocks.

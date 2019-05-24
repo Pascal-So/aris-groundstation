@@ -41,14 +41,14 @@ services:
     depends_on:
       - "influx"
 
-  # visualization: # apache server that servers visualization webapp to client
-  #                # Note: this container takes a long time to build, so if you
-  #                # don't have time for that, run `npm run dev` instead in the
-  #                # `visualization` directory AFTER running `docker-compose up`
-  #                # with this service commented out. If you run it first, you
-  #                # risk having npm steal one of the ports needed by docker.
-  #   build: ./visualization
-  #   depends_on:
-  #     - "data-provider"
-  #   ports:
-  #     - 80:80
+  visualization: # apache server that servers visualization webapp to client
+                 # Note: this container takes a long time to build, so if you
+                 # don't have time for that, run `npm run dev` instead in the
+                 # `visualization` directory AFTER running `docker-compose up`
+                 # with this service commented out. If you run it first, you
+                 # risk having npm steal one of the ports needed by docker.
+    build: ./visualization
+    depends_on:
+      - "data-provider"
+    ports:
+      - 80:80
