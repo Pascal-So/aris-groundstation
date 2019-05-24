@@ -31,7 +31,8 @@
         <Graph title="Altitude (sensor fusion)" dataset="fusion_alt"></Graph>
         <Graph title="Vertical Velocity (sensor fusion)" dataset="fusion_vel"></Graph>
         <Graph title="Acceleration magnitude (accelerometer 1)" dataset="acceleration"></Graph>
-        <Graph title="Temperature (barometer 1)" dataset="bar1_temp"></Graph>
+        <Graph title="Airbrake u" dataset="brk_u"></Graph>
+        <!-- <Graph title="Temperature (barometer 1)" dataset="bar1_temp"></Graph> -->
         <br><br>
       </div>
     </div>

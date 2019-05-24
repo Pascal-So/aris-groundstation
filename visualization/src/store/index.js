@@ -70,6 +70,13 @@ export default new Vuex.Store({
                 };
             });
 
+            const brk_u = filtered.map(frame => {
+                return {
+                    x: frame.time / 1000,
+                    y: frame.brk.u,
+                };
+            });
+
             const acceleration = filtered.map(frame => {
                 const sq = frame.acc1.x * frame.acc1.x + frame.acc1.y * frame.acc1.y + frame.acc1.z * frame.acc1.z;
 
@@ -84,6 +91,7 @@ export default new Vuex.Store({
                 fusion_vel: fusion_vel,
                 fusion_alt: fusion_alt,
                 bar1_temp: bar1_temp,
+                brk_u: brk_u,
             };
         },
     },
