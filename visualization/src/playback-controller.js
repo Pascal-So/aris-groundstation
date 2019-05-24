@@ -44,7 +44,7 @@ function PlaybackController(database){
                 console.log("Error: hw time decreased");
                 diff = view_update_interval;
             }
-            new_playback_time = playback_time + current_hw_timestamp - last_view_update_hw_timestamp;
+            new_playback_time = playback_time + diff;
         }
         last_view_update_hw_timestamp = current_hw_timestamp;
 
