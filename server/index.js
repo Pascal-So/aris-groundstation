@@ -8,7 +8,7 @@ const cors = require('cors');
 // construct InfluxDB query string
 function selectSensorString(fields, measurement, start_time, end_time){
     const str = `SELECT ${fields.map(name => `last(${name}) as ${name}`).join(', ')} FROM ${measurement} `
-        + `WHERE time >= ${start_time} and time <= ${end_time} GROUP BY time(${Config.data_time_resolution}ms) fill(previous) limit ${Config.send_max_frames}`;
+        + `WHERE time >= ${start_time} and time <= ${end_time} GROUP BY time(${Config.data_time_resolution}ms) limit ${Config.send_max_frames}`;
     return str;
 }
 

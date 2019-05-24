@@ -49,33 +49,35 @@ export default new Vuex.Store({
         graphFormattedData: state => {
             const filtered = state.data.filter(frame => frame.time <= state.playback_time);
 
+            const y_non_null = frame => frame.y !== null;
+
             const fusion_alt = filtered.map(frame => {
                 return {
                     x: frame.time / 1000,
                     y: frame.fusion.alt,
                 };
-            });
+            }).filter(y_non_null);
 
             const fusion_vel = filtered.map(frame => {
                 return {
                     x: frame.time / 1000,
                     y: frame.fusion.vel,
                 };
-            });
+            }).filter(y_non_null);
 
             const bar1_temp = filtered.map(frame => {
                 return {
                     x: frame.time / 1000,
                     y: frame.bar1.temp,
                 };
-            });
+            }).filter(y_non_null);
 
             const brk_u = filtered.map(frame => {
                 return {
                     x: frame.time / 1000,
                     y: frame.brk.u,
                 };
-            });
+            }).filter(y_non_null);
 
             const acceleration = filtered.map(frame => {
                 const sq = frame.acc1.x * frame.acc1.x + frame.acc1.y * frame.acc1.y + frame.acc1.z * frame.acc1.z;
@@ -84,7 +86,7 @@ export default new Vuex.Store({
                     x: frame.time / 1000,
                     y: (frame.acc1.x === null) ? null : Math.sqrt(sq),
                 };
-            });
+            }).filter(y_non_null);
 
             return {
                 acceleration: acceleration,

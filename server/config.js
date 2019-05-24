@@ -8,12 +8,12 @@ module.exports = {
     // Max amount of data frames to send to frontend for
     // one request. Can set this to a low value if the client
     // is always on the same network.
-    send_max_frames: 50,
+    send_max_frames: 200,
 
     // The time duration for one data frame. Increase value
     // to improve performance, decrease to improve accuracy of
     // displayed values. Unit is milliseconds.
     // NOTE: Change value in visualization/src/config.js to the
     // same value!
-    data_time_resolution: 50 // ms
+    data_time_resolution: 100 // ms
 };

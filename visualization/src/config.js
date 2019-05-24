@@ -6,14 +6,14 @@ export default {
     fetch_url: fetch_url, // url without trailing slash
 
     // See server/config.js for info about the time resolution!
-    data_time_resolution: 50, // ms
+    data_time_resolution: 100, // ms
 
     // To improve performance, we don't update the view with the
     // frequency specified above, but rather in multiples of it.
-    // This was mostly useful for the 3d viz, so now that this is
-    // removed, we could probably even choose a value of 1 here.
-    // Just see what works and what doesn't.
-    data_frames_per_view_update: 2,
+    // This was mostly useful for the 3d viz, but looking at what
+    // the raspberry pi can handle, better don't set a value of
+    // 1 just yet :D
+    data_frames_per_view_update: 3,
 
-    fetch_ahead_time: 10 * 50, // ms
+    fetch_ahead_time: 10 * 100, // ms
 };
