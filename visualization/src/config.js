@@ -13,7 +13,7 @@ export default {
     // This was mostly useful for the 3d viz, but looking at what
     // the raspberry pi can handle, better don't set a value of
     // 1 just yet :D
-    data_frames_per_view_update: 3,
+    data_frames_per_view_update: 2,
 
     fetch_ahead_time: 10 * 100, // ms
 

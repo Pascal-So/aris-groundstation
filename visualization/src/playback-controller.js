@@ -7,6 +7,8 @@ function PlaybackController(database){
     var last_requested_data_time;
     var playback_time; // in milliseconds data time
 
+    var last_view_update_hw_timestamp = null;
+
     const playback_speed = 1.0; // use this for debugging
 
     var viewLoop_timeout_object; // storing the timeout that then calls the next viewLoop iteration
@@ -27,7 +29,24 @@ function PlaybackController(database){
 
         if(!playing) return;
 
-        var new_playback_time = playback_time + view_update_interval;
+        // We check how much time has passed since the last view update, and move the playback
+        // time ahead accordingly. If the last hardware timestamp is not saved, we assume that
+        // we freshly started playing back or that we skipped to somewhere, so we just use the
+        // default time interval of view_update_interval.
+        var new_playback_time;
+        const current_hw_timestamp = Date.now();
+        if (last_view_update_hw_timestamp === null) {
+            new_playback_time = playback_time + view_update_interval;
+        } else {
+            let diff = current_hw_timestamp - last_view_update_hw_timestamp;
+            // console.log("hw time diff: ", diff);
+            if (diff < 0) {
+                console.log("Error: hw time decreased");
+                diff = view_update_interval;
+            }
+            new_playback_time = playback_time + current_hw_timestamp - last_view_update_hw_timestamp;
+        }
+        last_view_update_hw_timestamp = current_hw_timestamp;
 
         const range = store.getters.storedDataRange;
         const in_range = range && (playback_time >= range.start && playback_time <= range.end)
@@ -122,6 +141,7 @@ function PlaybackController(database){
         }
 
         playback_time = new_time;
+        last_view_update_hw_timestamp = null;
         store.commit('setPlaybackTime', playback_time);
         viewLoop(); // don't wait for next loop iteration
     }
