@@ -16,10 +16,12 @@
       <div class="panel scrollpanel area-graph">
         <Graph title="Altitude (sensor fusion)" dataset="fusion_alt"></Graph>
         <Graph title="Vertical Velocity (sensor fusion)" dataset="fusion_vel"></Graph>
-        <Graph title="Acceleration magnitude (accelerometer 1)" dataset="acceleration"></Graph>
         <Graph title="Airbrake u" dataset="brk_u"></Graph>
         <!-- <Graph title="Temperature (barometer 1)" dataset="bar1_temp"></Graph> -->
         <br><br>
+      </div>
+      <div class="panel scrollpanel area-graph2">
+        <Graph title="Acceleration magnitude (accelerometer 1)" dataset="acceleration"></Graph>
       </div>
 
       <div class="panel scrollpanel area-status">
@@ -113,6 +115,7 @@ a:visited{
 .area-event { grid-area: event; }
 .area-status { grid-area: status; }
 .area-graph { grid-area: graph; }
+.area-graph2 { grid-area: graph2; }
 
 .panel{
   border: 3px solid #5C5C5C;
@@ -175,28 +178,24 @@ a:visited{
     padding-bottom: 75px;
   }
 
-  .grid{
-    grid-template-columns: 1fr 0.6fr;
-    height: 900px;
-  }
-
   .infoblock h3{
     font-size: 14px;
   }
   .infoblock h2{
     font-size: 25px;
   }
-}
 
-@media(max-width: 700px){
   .grid{
     display: block;
-    /*grid-template-columns: 1fr;
-    grid-template-rows: 1fr 170px;
-    grid-template-areas:
-        "graph"
-        "status";
-    height: 1600px;*/
+    height: auto;
+  }
+
+  .grid .panel {
+    margin-bottom: 8px;
+  }
+
+  .area-status {
+    padding-bottom: 8px;
   }
 }
 
