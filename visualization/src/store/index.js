@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { EventBus } from './../event-bus';
 import Config from './../config';
+import utils from './../utils';
 
 Vue.use(Vuex);
 
@@ -27,7 +28,20 @@ export default new Vuex.Store({
         // note: this copy of the playback_time is only used for filtering the
         // graph display. the one true source of truth for the playback time is
         // still playback-controller.js.
+        // Stored in milliseconds.
         playback_time: 0,
+
+        // These keep the gps with the biggest timestamp seen, even after a complete
+        // view reset. If no gps data is currently available in the stored data,
+        // then this value is displayed.
+        last_seen_gps1: {
+            coords: null,
+            time: null,
+        },
+        last_seen_gps2: {
+            coords: null,
+            time: null,
+        },
     },
     getters: {
         storedDataRange: state => {
@@ -45,6 +59,35 @@ export default new Vuex.Store({
         },
         events: state => {
             return state.events;
+        },
+        status: state => {
+            let status = {
+                temp: null,
+                gps1: null,
+                gps2: null,
+                state: null,
+            }
+
+            for (const frame of state.data) {
+                if (frame.time > state.playback_time)
+                    break;
+
+                if (frame.bar1.temp !== null)
+                    status.temp = frame.bar1.temp;
+                if (frame.gps1.coords !== null)
+                    status.gps1 = frame.gps1.coords;
+                if (frame.gps2.coords !== null)
+                    status.gps2 = frame.gps2.coords;
+                if (frame.fusion.state !== null)
+                    status.state = frame.fusion.state;
+
+                if (status.gps1 === null && state.last_seen_gps1.coords !== null)
+                    status.gps1 = "(at " + utils.renderTime(state.last_seen_gps1.time) + ") " + state.last_seen_gps1.coords;
+                if (status.gps2 === null && state.last_seen_gps2.coords !== null)
+                    status.gps2 = "(at " + utils.renderTime(state.last_seen_gps2.time) + ") " + state.last_seen_gps2.coords;
+            }
+
+            return status;
         },
         graphFormattedData: state => {
             const filtered = state.data.filter(frame => frame.time <= state.playback_time);
@@ -107,6 +150,22 @@ export default new Vuex.Store({
                 return;
             }
 
+            // find newest gps data
+            for (const frame of new_data) {
+                if (frame.gps1.coords !== null &&
+                    (state.last_seen_gps1.time === null || frame.time > state.last_seen_gps1.time)) {
+
+                    state.last_seen_gps1.coords = frame.gps1.coords;
+                    state.last_seen_gps1.time = frame.time;
+                }
+                if (frame.gps2.coords !== null &&
+                    (state.last_seen_gps2.time === null || frame.time > state.last_seen_gps2.time)) {
+
+                    state.last_seen_gps2.coords = frame.gps2.coords;
+                    state.last_seen_gps2.time = frame.time;
+                }
+            }
+
             const new_data_start_time = new_data[0].time;
 
             // vuex does not allow access to getters in mutations..  -.-
@@ -132,6 +191,10 @@ export default new Vuex.Store({
         },
         setPlaybackTime (state, new_time) {
             state.playback_time = new_time;
+
+            // Remove data that is more than Config.keep_data_time
+            // milliseconds behind the current playback position.
+            state.data = state.data.filter(frame => frame.time >= state.playback_time - Config.keep_data_time);
         },
         clear (state) {
             state.data = [];

@@ -16,4 +16,34 @@ export default {
     data_frames_per_view_update: 3,
 
     fetch_ahead_time: 10 * 100, // ms
+
+    // Data that is more than this amount of time behind the
+    // current playback position will be removed from the store.
+    // This means that the graphs only show at most this much
+    // data, as the currently loaded data ahead of the playback
+    // position is not displayed in the graphs.
+    keep_data_time: 15 * 1000, // ms
+
+    // see file `/event_ids.txt`
+    states: {
+        // 2019 events
+        0: 'READY',
+        1: 'CALIBRATING',
+        2: 'PRELAUNCH',
+        3: 'TAKING OFF',
+        4: 'BRAKING',
+        5: 'APOGEE',
+        6: 'LANDED',
+
+        // 2018 events:
+        // 1: 'OFF',
+        // 3: 'READY',
+        // 4: 'PRE LAUNCH',
+        // 5: 'TAKING OFF',
+        // 6: 'BRAKING',
+        // 7: 'APOGEE',
+        // 8: 'DROGUE PARACHUTE',
+        // 9: 'MAIN PARACHUTE',
+        // 10: 'LANDED',
+    },
 };

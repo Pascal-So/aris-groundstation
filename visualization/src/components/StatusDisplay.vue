@@ -4,11 +4,19 @@
     <table>
       <tr>
         <td>GPS 1</td>
-        <td align="right" v-html="gpsFormat(gps1)"></td>
+        <td align="right" v-html="gpsFormat(status.gps1)"></td>
       </tr>
       <tr>
         <td>GPS 2</td>
-        <td align="right" v-html="gpsFormat(gps2)"></td>
+        <td align="right" v-html="gpsFormat(status.gps2)"></td>
+      </tr>
+      <tr>
+        <td>Temp</td>
+        <td align="right">{{Math.round(status.temp * 100) / 100}}°C</td>
+      </tr>
+      <tr>
+        <td>State</td>
+        <td align="right" v-html="stateFormat(status.state)"></td>
       </tr>
     </table>
 
@@ -26,7 +34,9 @@
 
 <script>
 
+import { mapGetters } from 'vuex';
 import { EventBus } from '../event-bus.js';
+import Config from '../config';
 
 const null_status = {
   pl_on: null,
@@ -41,16 +51,17 @@ export default {
   name: 'StatusDisplay',
   data () {
     return {
-      status: null_status,
-      gps1: null,
-      gps2: null,
     };
   },
-  mounted () {
-    EventBus.$on('new-data', this.newData);
-    EventBus.$on('reset-views', this.reset);
+  computed: {
+    ...mapGetters([
+      'status',
+    ]),
   },
   methods: {
+    stateFormat(state_id) {
+      return Config.states[state_id];
+    },
     gpsFormat(coords) {
       if(coords === null){
         return '??';
@@ -74,26 +85,6 @@ export default {
         // 2019 or unknown format
         return coords.replace(/ /g, '&nbsp;');
       }
-    },
-    newData (data) {
-      if(data.length === 0) return;
-
-      const frame = data[data.length - 1];
-
-      // this.status.pl_on = frame.status.pl_on;
-      // this.status.pl_alive = frame.status.pl_alive;
-      // this.status.wifi_status = frame.status.wifi_status;
-      // this.status.sensor_status = frame.status.sensor_status;
-      // this.status.sd_status = frame.status.sd_status;
-      // this.status.control_status = frame.status.control_status;
-
-      this.gps1 = frame.gps1.coords;
-      this.gps2 = frame.gps2.coords;
-    },
-    reset () {
-      this.status = null_status;
-      this.gps1 = null;
-      this.gps2 = null;
     },
     statusString (key) {
       switch(this.status[key]){

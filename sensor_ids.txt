@@ -16,7 +16,8 @@ Barometer2      4       'bar2'       float32  float32
 GPS1            7       'gps1'       int32    int32                                      // lat, lng, jeweils / 10'000'000, dann D.D° Format https://tnp.uservoice.com/knowledgebase/articles/172110-latitude-longitude-formats-and-conversion
 GPS2            8       'gps2'       int32    int32
 Brakes          105     'brk'        float32  float32  float32                           // u (Auslenkung), w0, w1 (integrator states)
-SensorFusion    106     'fusion'     float32  float32                                    // 'alt' (m)  'vel' (m/s)
+SensorFusion    106     'fusion'     uint32   float32  float32                           // state   alt (m)  vel (m/s)
+
 
 Unused sensors, left over from 2018:
 Magnetometer    5       'mag'        float32  float32  float32

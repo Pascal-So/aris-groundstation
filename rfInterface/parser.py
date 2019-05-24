@@ -56,8 +56,8 @@ sensor_id_table = {
     },
     106: {
         "measurement": 'fusion',
-        "encoding": 'ff',
-        "fields": ['alt', 'vel'],
+        "encoding": 'Iff',
+        "fields": ['state', 'alt', 'vel'],
     },
 
 

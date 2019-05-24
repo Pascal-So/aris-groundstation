@@ -13,20 +13,6 @@
     <br>
 
     <div class="grid">
-      <!-- <div class="panel area-viz">
-        <Visualization class="fill" v-if="visualization_active"/>
-        <div class="fill" v-if="! visualization_active" style="padding: 50px 20px;">
-          <button @click.prevent="visualization_active = true" style="margin: auto; display: block;">
-            Click here to activate the 3d viz. Note: can be slow depending on hardware.
-          </button>
-        </div>
-      </div> -->
-      <div class="panel scrollpanel area-event">
-        <Eventlist/>
-      </div>
-      <div class="panel scrollpanel area-status">
-        <StatusDisplay/>
-      </div>
       <div class="panel scrollpanel area-graph">
         <Graph title="Altitude (sensor fusion)" dataset="fusion_alt"></Graph>
         <Graph title="Vertical Velocity (sensor fusion)" dataset="fusion_vel"></Graph>
@@ -35,6 +21,17 @@
         <!-- <Graph title="Temperature (barometer 1)" dataset="bar1_temp"></Graph> -->
         <br><br>
       </div>
+
+      <div class="panel scrollpanel area-status">
+        <StatusDisplay/>
+      </div>
+
+      <!-- <div class="panel area-viz">
+        <Visualization class="fill"/>
+      </div> -->
+      <!-- <div class="panel scrollpanel area-event">
+        <Eventlist/>
+      </div> -->
     </div>
 
     <br>
@@ -44,8 +41,8 @@
 <script>
 
 import Graph from './Graph.vue';
-import Eventlist from './Eventlist.vue';
-import Visualization from './Visualization.vue';
+// import Eventlist from './Eventlist.vue';
+// import Visualization from './Visualization.vue';
 import { EventBus } from '../event-bus.js';
 import PlaybackControls from './PlaybackControls.vue';
 import StatusDisplay from './StatusDisplay.vue';
@@ -55,8 +52,8 @@ import store from '../store'
 export default {
   components: {
     'Graph': Graph,
-    'Eventlist': Eventlist,
-    'Visualization': Visualization,
+    // 'Eventlist': Eventlist,
+    // 'Visualization': Visualization,
     'PlaybackControls': PlaybackControls,
     'StatusDisplay': StatusDisplay,
   },
@@ -65,7 +62,6 @@ export default {
   data () {
     return {
       controller: null,
-      visualization_active: false,
     }
   },
   mounted () {
@@ -105,10 +101,10 @@ a:visited{
   display: grid;
   grid-gap: 8px;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 140px;
+  grid-template-rows: 170px 1fr;
   grid-template-areas:
-    "graph event "
-    "graph status";
+    "graph status"
+    "graph graph2";
   grid-auto-rows: auto;
   height: 700px;
 }
@@ -194,14 +190,13 @@ a:visited{
 
 @media(max-width: 700px){
   .grid{
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr 0.7fr 1fr;
+    display: block;
+    /*grid-template-columns: 1fr;
+    grid-template-rows: 1fr 170px;
     grid-template-areas:
         "graph"
-        "event"
-        "status"
-        "viz";
-    height: 1600px;
+        "status";
+    height: 1600px;*/
   }
 }
 

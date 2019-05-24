@@ -133,7 +133,7 @@ function getDataRange(influx, range_limits, start_time = null){
         'gps1': ['coords'],
         'gps2': ['coords'],
         'brk': ['u', 'w0', 'w1'],
-        'fusion': ['alt', 'vel'],
+        'fusion': ['state', 'alt', 'vel'],
     };
 
     const sensors_promise = runSensorQueries(influx, sensor_fields, start_time, end_time);
@@ -158,58 +158,58 @@ function connect(database){
     var influx = new Influx.InfluxDB({
         host: Config.influx_host,
         database: database,
-        schema: [
-            {
-                measurement: 'acc1', fields: xyz, tags: []
-            }, {
-                measurement: 'acc2', fields: xyz, tags: []
-            }, {
-                measurement: 'gyro1', fields: xyz, tags: []
-            }, {
-                measurement: 'gyro2', fields: xyz, tags: []
-            }, {
-                measurement: 'bar1',
-                fields: {
-                    hpa: Influx.FieldType.Float,
-                    temp: Influx.FieldType.Float
-                },
-                tags: []
-            }, {
-                measurement: 'bar2',
-                fields: {
-                    hpa: Influx.FieldType.Float,
-                    temp: Influx.FieldType.Float
-                },
-                tags: []
-            }, {
-                measurement: 'gps1',
-                fields: {
-                    coords: Influx.FieldType.String
-                },
-                tags: []
-            }, {
-                measurement: 'gps2',
-                fields: {
-                    coords: Influx.FieldType.String
-                },
-                tags: []
-            }, {
-                measurement: 'brk',
-                fields: {
-                    u: Influx.FieldType.Float,
-                    w0: Influx.FieldType.Float,
-                    w1: Influx.FieldType.Float
-                },
-                tags: []
-            }, {
-                measurement: 'fusion',
-                fields: {
-                    alt: Influx.FieldType.Float,
-                    vel: Influx.FieldType.Float
-                },
-                tags: []
-            },
-        ],
+        // schema: [
+        //     {
+        //         measurement: 'acc1', fields: xyz, tags: []
+        //     }, {
+        //         measurement: 'acc2', fields: xyz, tags: []
+        //     }, {
+        //         measurement: 'gyro1', fields: xyz, tags: []
+        //     }, {
+        //         measurement: 'gyro2', fields: xyz, tags: []
+        //     }, {
+        //         measurement: 'bar1',
+        //         fields: {
+        //             hpa: Influx.FieldType.Float,
+        //             temp: Influx.FieldType.Float
+        //         },
+        //         tags: []
+        //     }, {
+        //         measurement: 'bar2',
+        //         fields: {
+        //             hpa: Influx.FieldType.Float,
+        //             temp: Influx.FieldType.Float
+        //         },
+        //         tags: []
+        //     }, {
+        //         measurement: 'gps1',
+        //         fields: {
+        //             coords: Influx.FieldType.String
+        //         },
+        //         tags: []
+        //     }, {
+        //         measurement: 'gps2',
+        //         fields: {
+        //             coords: Influx.FieldType.String
+        //         },
+        //         tags: []
+        //     }, {
+        //         measurement: 'brk',
+        //         fields: {
+        //             u: Influx.FieldType.Float,
+        //             w0: Influx.FieldType.Float,
+        //             w1: Influx.FieldType.Float
+        //         },
+        //         tags: []
+        //     }, {
+        //         measurement: 'fusion',
+        //         fields: {
+        //             alt: Influx.FieldType.Float,
+        //             vel: Influx.FieldType.Float
+        //         },
+        //         tags: []
+        //     },
+        // ],
     });
 
     return influx;
