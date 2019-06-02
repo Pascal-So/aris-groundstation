@@ -1,8 +1,8 @@
-const fetch_port = '8080';
-const fetch_url = `${window.location.protocol}//${window.location.hostname}:${fetch_port}`;
+// const fetch_port = '8080';
+// const fetch_url = `${window.location.protocol}//${window.location.hostname}:${fetch_port}`;
+const fetch_url = 'http://data.localhost:8080';
 
 export default {
-    fetch_port: fetch_port,
     fetch_url: fetch_url, // url without trailing slash
 
     // See server/config.js for info about the time resolution!
