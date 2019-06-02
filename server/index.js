@@ -158,58 +158,6 @@ function connect(database){
     var influx = new Influx.InfluxDB({
         host: Config.influx_host,
         database: database,
-        // schema: [
-        //     {
-        //         measurement: 'acc1', fields: xyz, tags: []
-        //     }, {
-        //         measurement: 'acc2', fields: xyz, tags: []
-        //     }, {
-        //         measurement: 'gyro1', fields: xyz, tags: []
-        //     }, {
-        //         measurement: 'gyro2', fields: xyz, tags: []
-        //     }, {
-        //         measurement: 'bar1',
-        //         fields: {
-        //             hpa: Influx.FieldType.Float,
-        //             temp: Influx.FieldType.Float
-        //         },
-        //         tags: []
-        //     }, {
-        //         measurement: 'bar2',
-        //         fields: {
-        //             hpa: Influx.FieldType.Float,
-        //             temp: Influx.FieldType.Float
-        //         },
-        //         tags: []
-        //     }, {
-        //         measurement: 'gps1',
-        //         fields: {
-        //             coords: Influx.FieldType.String
-        //         },
-        //         tags: []
-        //     }, {
-        //         measurement: 'gps2',
-        //         fields: {
-        //             coords: Influx.FieldType.String
-        //         },
-        //         tags: []
-        //     }, {
-        //         measurement: 'brk',
-        //         fields: {
-        //             u: Influx.FieldType.Float,
-        //             w0: Influx.FieldType.Float,
-        //             w1: Influx.FieldType.Float
-        //         },
-        //         tags: []
-        //     }, {
-        //         measurement: 'fusion',
-        //         fields: {
-        //             alt: Influx.FieldType.Float,
-        //             vel: Influx.FieldType.Float
-        //         },
-        //         tags: []
-        //     },
-        // ],
     });
 
     return influx;
@@ -275,7 +223,7 @@ app.get('/get-data', (req, res) => {
             const send_sensors_data = response_data.sensors.slice(0, Config.send_max_frames).map(adjust_start_lambda);
             const send_events_data = response_data.events.map(adjust_start_lambda);
 
-            console.log(`Sending ${send_sensors_data.length} frames of sensor data, and ${send_events_data.length} events.`);
+            console.log(`Sending ${send_sensors_data.length} frames of sensor data and ${send_events_data.length} events.`);
             res.json({
                 data: send_sensors_data,
                 events: send_events_data,

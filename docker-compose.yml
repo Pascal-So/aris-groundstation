@@ -11,19 +11,19 @@ services:
     logging: # This disables logging for InfluxDB (mostly spam). If you need it for some reason, remove this block.
       driver: none
 
-  receiver: # python script communicating with xbee
-    build: ./rfInterface/
-    devices:  # Change the devce to the usb port where the xbee module is connected
-      - "/dev/ttyUSB0:/USB"
-    depends_on:
-      - "influx"
-    ports:
-      - 5000:5000
-    environment:
-      - FLASK_ENV=development
-    restart: unless-stopped
-    volumes:
-      - ./container-data/receiver:/var/log/receiver
+  # receiver: # python script communicating with xbee
+  #   build: ./rfInterface/
+  #   devices:  # Change the devce to the usb port where the xbee module is connected
+  #     - "/dev/ttyUSB0:/USB"
+  #   depends_on:
+  #     - "influx"
+  #   ports:
+  #     - 5000:5000
+  #   environment:
+  #     - FLASK_ENV=development
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./container-data/receiver:/var/log/receiver
 
   # grafana: # uncomment this if u need raw data access
   #   image: grafana/grafana
@@ -41,14 +41,14 @@ services:
     depends_on:
       - "influx"
 
-  visualization: # apache server that servers visualization webapp to client
-                 # Note: this container takes a long time to build, so if you
-                 # don't have time for that, run `npm run dev` instead in the
-                 # `visualization` directory AFTER running `docker-compose up`
-                 # with this service commented out. If you run it first, you
-                 # risk having npm steal one of the ports needed by docker.
-    build: ./visualization
-    depends_on:
-      - "data-provider"
-    ports:
-      - 80:80
+  # visualization: # apache server that servers visualization webapp to client
+  #                # Note: this container takes a long time to build, so if you
+  #                # don't have time for that, run `npm run dev` instead in the
+  #                # `visualization` directory AFTER running `docker-compose up`
+  #                # with this service commented out. If you run it first, you
+  #                # risk having npm steal one of the ports needed by docker.
+  #   build: ./visualization
+  #   depends_on:
+  #     - "data-provider"
+  #   ports:
+  #     - 80:80

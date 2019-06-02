@@ -2,7 +2,7 @@
 
 Visualization/data handling/storage solutions for ARIS.
 
-This is in development so don't count on things staying where they are, stuff might move around quite a lot in here.
+If something in this codebase looks like it's not used anymore, it's probably because it was added for the 2018 version.
 
 ## Usage
 First make sure that docker and docker-compose are installed and that the docker service is running. Check the [official Docker website](https://docs.docker.com/install/) for that.
@@ -25,6 +25,12 @@ The flight data is received from the usb device specified in the `docker-compose
 Some of the behaviour of the frontend / server can be adjusted in `visualization/src/config.js` and `server/config.js`.
 
 ## Todo
+
+Things that would be nice to have, but are not critical to the 2019 competition:
+
+* Make server and frontend work with both 2018 and 2019 databases.
+* Clean up server/index.js, this should probably not just be all in one file. Also what is this ifdb mess.
+* Add reverse proxy to server containers so that we can have all communication on ports 80/443.
 
 ## Troubleshooting
 
