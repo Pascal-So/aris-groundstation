@@ -12,6 +12,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import struct
 from digi.xbee.devices import XBeeDevice
 
 # The device "/USB" is connected to /dev/ttyUSBx in docker compose file.
@@ -34,12 +35,21 @@ def xbee_listen(callback):
     if rf_device is None or not rf_device.is_open():
         xbee_connect()
 
-    def xbee_unwrap_message_and_call_callback(xbee_message):
-        sender = xbee_message.remote_device.get_64bit_addr()
-        bytestream = xbee_message.data
-        callback(bytestream, sender.address)
+    while True:
+        try:
+            xbee_message = rf_device.read_data()
+            if xbee_message is not None:
+                sender = xbee_message.remote_device.get_64bit_addr()
+                bytestream = xbee_message.data
+                callback(bytestream, sender.address)
 
-    rf_device.add_data_received_callback(xbee_unwrap_message_and_call_callback)
+                rssi_raw = rf_device.get_parameter("DB")
+                rssi = struct.unpack('<B', rssi_raw)[0]
+                print("rssi: -" + str(rssi), flush=True)
+
+        except:
+            if rf_device is None or not rf_device.is_open():
+                xbee_connect()
 
 # https://github.com/digidotcom/python-xbee/tree/master/examples/communication
 def xbee_send(data):
