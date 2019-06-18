@@ -56,14 +56,14 @@ def main():
     try:
         time.sleep(3) # give InfluxDB some time to get its shit together
 
+        database_name = datetime.utcnow().strftime("flight-%Y-%m-%d-%H-%M-%S")
+        print('Creating InfluxDB database', database_name)
+        ifdb_connect(database_name)
+
         try:
             xbee_listen(data_receive_callback)
         except Exception as ex:
             print("Error: Could not set up connection to xbee.", ex, flush=True)
-
-        database_name = datetime.utcnow().strftime("flight-%Y-%m-%d-%H-%M-%S")
-        print('Creating InfluxDB database', database_name)
-        ifdb_connect(database_name)
 
         run_control_server(send_command_callback)
         

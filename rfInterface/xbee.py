@@ -13,6 +13,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import struct
+import time
 from digi.xbee.devices import XBeeDevice
 
 # The device "/USB" is connected to /dev/ttyUSBx in docker compose file.
@@ -35,10 +36,13 @@ def xbee_listen(callback):
     if rf_device is None or not rf_device.is_open():
         xbee_connect()
 
+    last_package_time = time.time()
+
     while True:
         try:
             xbee_message = rf_device.read_data()
             if xbee_message is not None:
+                last_package_time = time.time()
                 sender = xbee_message.remote_device.get_64bit_addr()
                 bytestream = xbee_message.data
                 callback(bytestream, sender.address)
@@ -46,6 +50,10 @@ def xbee_listen(callback):
                 rssi_raw = rf_device.get_parameter("DB")
                 rssi = struct.unpack('<B', rssi_raw)[0]
                 print("rssi: -" + str(rssi), flush=True)
+
+            if time.time() - last_package_time > 5:
+                xbee_close()
+                xbee_connect()
 
         except:
             if rf_device is None or not rf_device.is_open():
