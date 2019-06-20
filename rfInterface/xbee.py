@@ -54,6 +54,7 @@ def xbee_listen(callback):
             if time.time() - last_package_time > 5:
                 xbee_close()
                 xbee_connect()
+                last_package_time = time.time()
 
         except:
             if rf_device is None or not rf_device.is_open():
