@@ -10,7 +10,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "chart.js": "^2.8.0",
+    "chart.js": "^2.9.4",
     "orbit-controls-es6": "^1.0.12",
     "request": "^2.88.0",
     "three": "^0.91.0",
