@@ -13,7 +13,7 @@
     "chart.js": "^2.8.0",
     "orbit-controls-es6": "^1.0.12",
     "request": "^2.88.0",
-    "three": "^0.91.0",
+    "three": "^0.137.0",
     "vue": "^2.6.10",
     "vue-chartjs": "^3.4.2",
     "vue-router": "^3.0.2",
