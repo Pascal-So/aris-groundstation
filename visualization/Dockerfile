@@ -1,24 +1,16 @@
-FROM httpd:2.4
+FROM node:16
 
-RUN apt-get update && \
-    apt-get install -y apt-transport-https lsb-release curl gnupg2 && \
-    curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    echo 'deb https://deb.nodesource.com/node_9.x jessie main' > /etc/apt/sources.list.d/nodesource.list && \
-    echo 'deb-src https://deb.nodesource.com/node_9.x jessie main' >> /etc/apt/sources.list.d/nodesource.list
-
-RUN apt-get update && apt-get install -y nodejs
-
-WORKDIR ~
-
+WORKDIR /app
 COPY package*.json ./
-
-RUN npm i npm@latest -g && npm install --quiet
-
-
+RUN npm install --quiet
 COPY . .
-
 RUN npm run build
 
-RUN mv dist/* /usr/local/apache2/htdocs/
+FROM halverneus/static-file-server:v1.8.5
+
+COPY --from=0 /app/dist/ /web/
+ENV CORS=true
+ENV PORT=80
+ENV FOLDER=/web
 
 EXPOSE 80
