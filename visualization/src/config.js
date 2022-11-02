@@ -1,8 +1,6 @@
-const fetch_port = '8080';
-const fetch_url = `${window.location.protocol}//${window.location.hostname}:${fetch_port}`;
+const fetch_url = `${window.location.protocol}//${window.location.hostname}/api`;
 
 export default {
-    fetch_port: fetch_port,
     fetch_url: fetch_url, // url without trailing slash
 
     data_frame_interval: 50, // ms, see influxdb query on server

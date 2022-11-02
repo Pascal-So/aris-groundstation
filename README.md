@@ -23,7 +23,32 @@ Start the docker containers on the groundstation laptop with `sudo docker-compse
 
 The flight data is received from the usb device specified in the `docker-compose.yml` file and stored in an InfluxDB Database with the name `flight-Y-m-d-H-M-S`.
 
+## Deployment
 
+```bash
+rsync -a -vvi -zz --progress --delete\
+    --exclude server/node_modules\
+    --exclude visualization/node_modules\
+    --exclude visualization/dist\
+    --exclude container-data\
+    --exclude rfInterface\
+    --exclude .git\
+    . server-name:code/aris-groundstation
+
+ssh server-name
+
+cd code/aris-groundstation
+sudo docker compose -f docker-compose.server.yml down
+
+sudo docker compose -f docker-compose.server.yml run -it influx bash
+influxd restore -metadir /var/lib/influxdb/meta /backups/influx-meta
+for b in /backups/*; do 
+    influxd restore -database $(basename $b) -datadir /var/lib/influxdb/data $b
+done
+exit
+
+sudo docker compose -f docker-compose.server.yml up -d
+```
 
 ## Todo
 
@@ -57,19 +82,6 @@ You can create backups like so:
 sudo docker exec -it aris-groundstation-influx-1 bash
 influxd backup /backups/influx-meta
 influxd backup -database <database> /backups/<database>
-```
-
-To restore backups the service must be stopped. Ideally you first delete `./container-data/database/` and then import the data with a separate influx container that does not start a service, otherwise the data won't be properly imported.
-
-```bash
-sudo docker-compose -f docker-compose.server.yml down
-rm -rf container-data/database
-sudo docker run --rm -it -v $PWD/container-data/database:/var/lib/influxdb -v $PWD/mestral_data/influx_backups:/backups influxdb:1.4 bash
-influxd restore -metadir /var/lib/influxdb/meta /backups/influx-meta
-for b in /backups/*; do 
-    influxd restore -database $(basename $b) -datadir /var/lib/influxdb/data $b
-done
-exit
 ```
 
 More info on backups in the [InfluxDB docs](https://docs.influxdata.com/influxdb/v1.4/administration/backup_and_restore/).
