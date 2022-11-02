@@ -1,8 +1,9 @@
 # ARIS Groundstation
 
-Visualization/data handling/storage solutions for ARIS.
+> **Note**</br>
+> This project is now archived, the branch you're looking at is used to power the website at https://aris.pascalsommer.ch/ to show some of our flight records.
 
-This is in development so don't count on things staying where they are, stuff might move around quite a lot in here.
+Visualization/data handling/storage solutions for ARIS.
 
 ## Usage
 First make sure, docker and docker-compose are installed. Check the [official Docker website](https://docs.docker.com/install/) for that.
@@ -21,6 +22,8 @@ sudo docker-compse build
 Start the docker containers on the groundstation laptop with `sudo docker-compse up`. Some data (e.g. flight data) will be stored in the directory container-data.
 
 The flight data is received from the usb device specified in the `docker-compose.yml` file and stored in an InfluxDB Database with the name `flight-Y-m-d-H-M-S`.
+
+
 
 ## Todo
 
@@ -45,6 +48,34 @@ If InfluxDB is installed on your local machine and the docker container can't st
 ```
 sudo systemctl stop influxdb.service
 ```
+
+#### Influx backups
+
+You can create backups like so:
+
+```bash
+sudo docker exec -it aris-groundstation-influx-1 bash
+influxd backup /backups/influx-meta
+influxd backup -database <database> /backups/<database>
+```
+
+To restore backups the service must be stopped. Ideally you first delete `./container-data/database/` and then import the data with a separate influx container that does not start a service, otherwise the data won't be properly imported.
+
+```bash
+sudo docker-compose -f docker-compose.server.yml down
+rm -rf container-data/database
+sudo docker run --rm -it -v $PWD/container-data/database:/var/lib/influxdb -v $PWD/mestral_data/influx_backups:/backups influxdb:1.4 bash
+influxd restore -metadir /var/lib/influxdb/meta /backups/influx-meta
+for b in /backups/*; do 
+    influxd restore -database $(basename $b) -datadir /var/lib/influxdb/data $b
+done
+exit
+```
+
+More info on backups in the [InfluxDB docs](https://docs.influxdata.com/influxdb/v1.4/administration/backup_and_restore/).
+
+Note that the backups in the `mestral_data/influx_backups` dir use the 2018 format.
+
 
 ### General
 Look at the output of `docker-compose up`, where some info will be printed by the various containers while running.
